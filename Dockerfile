@@ -10,6 +10,6 @@ RUN npm install
 
 RUN touch .env
 
-RUN npm run build
+RUN npm run buildReact
 
 ENTRYPOINT ["/bin/sh", "-c" , "npm start"]
