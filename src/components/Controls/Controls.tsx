@@ -132,10 +132,11 @@ export const Controls = (props: ControlsProps) => {
   });
   const playPauseProps = {
     onClick: () => {
+      if (disabled || isPauseDisabled) return;
       roomTogglePlay();
     },
     className: ` ${styles.action}`,
-    disabled: disabled || isPauseDisabled,
+    style: (disabled || isPauseDisabled) ? { opacity: 0.5, cursor: 'not-allowed', pointerEvents: 'none' as const } : {},
   };
   return (
     <div className={styles.controls}>
@@ -155,7 +156,8 @@ export const Controls = (props: ControlsProps) => {
         <IconPlayerSkipForwardFilled
           title="Skip to next"
           className={styles.action}
-          onClick={() => roomPlaylistPlay(0)}
+          onClick={() => { if (!disabled) roomPlaylistPlay(0); }}
+          style={disabled ? { opacity: 0.5, cursor: 'not-allowed', pointerEvents: 'none' as const } : {}}
         />
       )}
       <div
