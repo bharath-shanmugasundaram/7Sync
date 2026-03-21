@@ -98,3 +98,4 @@ Set environment variable `NODE_ENV=production`.
 ## License
 
 MIT — same as the original [WatchParty](https://github.com/howardchung/watchparty) project.
+# 7Sync
