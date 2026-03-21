@@ -8,6 +8,8 @@ RUN apt-get update && apt-get install -y python3 make g++ --no-install-recommend
 
 RUN npm install
 
+RUN touch .env
+
 RUN npm run build
 
 ENTRYPOINT ["/bin/sh", "-c" , "npm start"]
