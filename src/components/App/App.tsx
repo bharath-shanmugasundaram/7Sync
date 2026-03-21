@@ -1755,6 +1755,9 @@ export class App extends React.Component<AppProps, AppState> {
   };
 
   roomSeek = (time: number) => {
+    if (!this.state.isHost) {
+      return;
+    }
     let target = time;
     target = Math.max(target, 0);
     this.Player().seekVideo(target);
@@ -2522,6 +2525,16 @@ export class App extends React.Component<AppProps, AppState> {
                         onEnded={(e) => this.onVideoEnded(e.currentTarget.src)}
                         playsInline
                         onClick={this.roomTogglePlay}
+                        onPlay={(e) => {
+                          if (!this.state.isHost && this.state.roomPaused) {
+                            (e.target as HTMLVideoElement).pause();
+                          }
+                        }}
+                        onPause={(e) => {
+                          if (!this.state.isHost && !this.state.roomPaused) {
+                            (e.target as HTMLVideoElement).play();
+                          }
+                        }}
                       ></video>
                     )}
                     {Boolean(this.state.total) && (

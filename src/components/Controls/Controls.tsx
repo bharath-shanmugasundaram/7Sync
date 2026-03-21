@@ -172,7 +172,7 @@ export const Controls = (props: ControlsProps) => {
           color={isBehind ? "blue" : "grey"}
           title="Sync"
           onClick={() => {
-            if (isLiveStream) {
+            if (isLiveStream && props.isHost) {
               // in live case we want to seek the entire room to edge
               roomSeek(props.duration);
             } else {
