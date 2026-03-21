@@ -931,6 +931,15 @@ export class App extends React.Component<AppProps, AppState> {
                 (e.data === window.YT?.PlayerState?.PAUSED &&
                   !this.state.roomPaused))
             ) {
+              if (!this.state.isHost) {
+                if (e.data === window.YT?.PlayerState?.PLAYING) {
+                  e.target.pauseVideo();
+                } else {
+                  e.target.playVideo();
+                }
+                return;
+              }
+
               this.ytDebounce = false;
               if (e.data === window.YT?.PlayerState?.PLAYING) {
                 this.socket.emit("CMD:play");
