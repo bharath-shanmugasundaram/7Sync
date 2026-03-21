@@ -223,7 +223,8 @@ export class Chat extends React.Component<ChatProps> {
           marginTop: 0,
           marginBottom: 0,
           padding: "8px",
-          backgroundColor: "rgba(30,30,30,1)",
+          backgroundColor: "var(--chat-bg)",
+          borderLeft: "1px solid var(--chat-border)",
         }}
       >
         <div
@@ -272,7 +273,7 @@ export class Chat extends React.Component<ChatProps> {
         {this.state.isPickerOpen && (
           <div style={{ position: "absolute", bottom: "60px" }}>
             <Picker
-              theme="dark"
+              theme="light"
               previewPosition="none"
               maxFrequentRows={1}
               onEmojiSelect={this.addEmoji}
@@ -302,7 +303,7 @@ export class Chat extends React.Component<ChatProps> {
             }}
           >
             <Picker
-              theme="dark"
+              theme="light"
               previewPosition="none"
               maxFrequentRows={1}
               perLine={6}
@@ -426,7 +427,7 @@ const ChatMessage = ({
             trigger={
               <div
                 style={{ cursor: "pointer", fontWeight: 700 }}
-                title={isSub ? "WatchParty Plus subscriber" : ""}
+                title={isSub ? "7sync Plus subscriber" : ""}
                 className={`${isSub ? styles.subscriber : styles.light} ${styles.hoverEffect}`}
               >
                 {Boolean(system) && "System"}
@@ -551,7 +552,7 @@ const ChatMessage = ({
                           <span
                             className={styles.reactionCounter}
                             style={{
-                              color: "rgba(255, 255, 255, 0.85)",
+                              color: "#1971c2",
                               marginLeft: 3,
                             }}
                           >

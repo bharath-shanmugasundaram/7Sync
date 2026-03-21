@@ -1,20 +1,17 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import { softWhite } from "../../utils/utils";
 
 export const Footer = () => (
   <div
     style={{
-      margin: "1em",
-      paddingBottom: "1em",
-      fontSize: "14px",
-      color: softWhite,
+      padding: "24px",
+      textAlign: "center",
+      fontSize: "13px",
+      color: "var(--text-muted)",
+      borderTop: "1px solid var(--border-card)",
+      background: "var(--bg-primary)",
+      transition: "background 0.3s ease, border-color 0.3s ease",
     }}
   >
-    <Link to="/terms">Terms</Link>
-    {" · "}
-    <Link to="/privacy">Privacy</Link>
-    {" · "}
-    <Link to="/faq">FAQ</Link>
+    © 2026 7sync
   </div>
 );

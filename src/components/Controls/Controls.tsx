@@ -46,6 +46,7 @@ interface ControlsProps {
   localSetSubtitleMode: (mode: TextTrackMode, lang?: string) => void;
   roomPlaylistPlay: (index: number) => void;
   playlist: PlaylistVideo[];
+  isHost?: boolean;
 }
 
 export const Controls = (props: ControlsProps) => {
@@ -138,6 +139,13 @@ export const Controls = (props: ControlsProps) => {
   };
   return (
     <div className={styles.controls}>
+      <Badge
+        size="xs"
+        color={props.isHost ? "green" : "gray"}
+        title={props.isHost ? "You are the host" : "You are a viewer"}
+      >
+        {props.isHost ? "HOST" : "VIEWER"}
+      </Badge>
       {paused ? (
         <IconPlayerPlayFilled {...playPauseProps} />
       ) : (

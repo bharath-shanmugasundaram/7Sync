@@ -1,66 +1,284 @@
 .container {
   display: flex;
   flex-direction: column;
-  color: white;
-  /* background-image: linear-gradient(to bottom, #222222, #008cdd); */
-}
-
-.hero {
-  color: white;
-  width: 100%;
-  background-image: linear-gradient(to bottom, #222222, #006199);
-  border-bottom-left-radius: 0%;
-  border-bottom-right-radius: 50%;
-  display: flex;
-  justify-content: center;
-}
-
-.hero.green {
-  background-image: linear-gradient(to bottom, #222222, rgb(21, 114, 43));
-  border-bottom-left-radius: 50%;
-  border-bottom-right-radius: 0%;
-}
-
-.heroInner {
-  padding: 30px;
-  max-width: 1200px;
-  display: flex;
   align-items: center;
+  min-height: calc(100vh - 60px);
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-primary);
+  transition: background 0.3s ease;
 }
 
-@media only screen and (max-width: 600px) {
-  .heroInner {
-    flex-direction: column;
+/* Ambient glow behind hero */
+.ambientGlow {
+  position: absolute;
+  top: -200px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.7;
+}
+
+/* Hero */
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 100px 24px 60px;
+  position: relative;
+  z-index: 1;
+}
+
+.heroTitle {
+  font-size: clamp(36px, 6vw, 64px);
+  font-weight: 800;
+  line-height: 1.1;
+  margin: 0;
+  color: var(--text-primary);
+  letter-spacing: -1.5px;
+}
+
+.heroAccent {
+  color: var(--accent);
+}
+
+.heroSub {
+  font-size: clamp(16px, 2.5vw, 20px);
+  color: var(--text-secondary);
+  margin: 20px 0 40px;
+  font-weight: 400;
+  letter-spacing: 0.2px;
+}
+
+/* CTA Button */
+.ctaButton {
+  position: relative;
+  padding: 14px 40px;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  color: #ffffff;
+  background: var(--accent);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.ctaButton:hover {
+  background: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px var(--accent-glow), 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.ctaButton:active {
+  transform: translateY(0);
+}
+
+.ctaGlow {
+  display: none;
+}
+
+/* Hero actions layout */
+.heroActions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 480px;
+}
+
+/* Join room row */
+.joinRow {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.joinInput {
+  flex: 1;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  border: 1px solid var(--border-card);
+  border-radius: 10px;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.joinInput::placeholder {
+  color: var(--text-secondary);
+}
+
+.joinInput:focus {
+  border-color: var(--accent);
+}
+
+.joinButton {
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.joinButton:hover:not(:disabled) {
+  background: var(--accent-light);
+}
+
+.joinButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Features */
+.features {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  max-width: 900px;
+  width: 100%;
+  padding: 0 24px;
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 768px) {
+  .features {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
-.heroText {
-  font-size: 32px;
-  line-height: 1.2em;
-  font-weight: 600;
+@media (max-width: 480px) {
+  .features {
+    grid-template-columns: 1fr;
+  }
 }
 
-.subText {
-  color: lightgray;
-  font-size: 20px;
-  line-height: 1.5em;
-  margin-top: 8px;
-}
-
-.featureSection {
+.featureCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 16px;
+  padding: 28px 20px;
   display: flex;
-  max-width: 1200px;
-  justify-content: center;
-  margin: 0 auto;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.featureCard:hover {
+  border-color: var(--accent);
+  background: var(--accent-light);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px var(--accent-glow);
+}
+
+.featureIcon {
+  color: var(--accent);
 }
 
 .featureTitle {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  color: var(--text-primary);
 }
 
 .featureText {
-  color: lightgray;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* How it works */
+.howItWorks {
+  padding: 80px 24px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 800px;
+}
+
+.sectionTitle {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 40px;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+}
+
+.steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  flex-wrap: wrap;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px;
+}
+
+.stepNumber {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  background: var(--accent);
+  box-shadow: 0 4px 12px var(--accent-glow);
+}
+
+.stepText {
   font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.stepDivider {
+  width: 40px;
+  height: 1px;
+  background: var(--border-card);
+  margin-top: -20px;
+}
+
+@media (max-width: 600px) {
+  .steps {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .stepDivider {
+    width: 1px;
+    height: 20px;
+    margin-top: 0;
+  }
 }

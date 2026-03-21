@@ -16,8 +16,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Making this larger causes issues on mobile */
   min-height: 48vh;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .flexCenter {
@@ -59,11 +61,10 @@
 }
 
 .fullHeightColumn {
-  height: calc(100vh - 72px);
+  height: calc(100vh - 60px);
   transition: width ease-out 0.5s;
   &.leftColumn {
     @media only screen and (max-width: 600px) {
-      /* video height doesn't matter on mobile since things are stacked */
       height: initial;
     }
   }

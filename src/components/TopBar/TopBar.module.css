@@ -1,0 +1,79 @@
+.topBar {
+  display: flex;
+  align-items: center;
+  padding: 12px 24px;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-card);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.logoLink {
+  display: flex;
+  align-items: baseline;
+  text-decoration: none;
+  gap: 0;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.logoAccent {
+  color: var(--accent);
+}
+
+.logoText {
+  color: var(--text-primary);
+}
+
+.roomInfo {
+  display: flex;
+  flex-direction: column;
+  margin-left: 16px;
+}
+
+.roomTitle {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.roomDescription {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  gap: 8px;
+}
+
+.newRoomBtn {
+  background: var(--accent) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  border: none !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+}
+
+.newRoomBtn:hover {
+  background: var(--accent-hover) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--accent-glow) !important;
+}
+
+.themeToggle {
+  color: var(--text-secondary) !important;
+  transition: color 0.2s ease;
+}
+
+.themeToggle:hover {
+  color: var(--accent) !important;
+  background: var(--accent-light) !important;
+}

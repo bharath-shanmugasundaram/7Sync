@@ -1,221 +1,135 @@
-import React, { useContext } from "react";
-import { Button, Stepper } from "@mantine/core";
+import React, { useCallback, useContext, useState } from "react";
 import {
-  IconBrandDiscordFilled,
   IconBrandYoutubeFilled,
-  IconBrowser,
-  IconFile,
-  IconLink,
-  IconList,
-  IconMessageFilled,
-  type IconProps,
-  IconRefresh,
   IconScreenShare,
-  IconVideo,
+  IconFileUpload,
+  IconLink,
 } from "@tabler/icons-react";
-import { NewRoomButton } from "../TopBar/TopBar";
+import { createRoom } from "../TopBar/TopBar";
 import styles from "./Home.module.css";
 import { MetadataContext } from "../../MetadataContext";
 
+const features = [
+  {
+    Icon: IconBrandYoutubeFilled,
+    title: "YouTube",
+    text: "Watch videos together from YouTube in perfect sync.",
+  },
+  {
+    Icon: IconScreenShare,
+    title: "Screen Share",
+    text: "Share your screen or a browser tab with everyone.",
+  },
+  {
+    Icon: IconFileUpload,
+    title: "File Upload",
+    text: "Upload and stream your own video files.",
+  },
+  {
+    Icon: IconLink,
+    title: "URL Stream",
+    text: "Paste a video URL for everyone to watch.",
+  },
+];
+
 export const Home = () => {
   const { user } = useContext(MetadataContext);
+  const [joinCode, setJoinCode] = useState("");
+
+  const handleCreateRoom = useCallback(async () => {
+    await createRoom(user, false);
+  }, [user]);
+
+  const handleJoinRoom = useCallback(() => {
+    let code = joinCode.trim();
+    if (!code) return;
+    // Accept full URLs like https://host/watch/roomname or just the room code
+    const match = code.match(/\/watch\/(.+)/);
+    if (match) {
+      window.location.assign("/watch/" + match[1]);
+    } else {
+      // Treat as raw room code
+      code = code.replace(/^\/+/, "");
+      window.location.assign("/watch/" + code);
+    }
+  }, [joinCode]);
+
   return (
-    <div>
-      <div className={styles.container}>
-        <Hero
-          heroText={"Watch videos together with friends anywhere."}
-          subText={"No registration or download required."}
-          action={
-            <div style={{ marginTop: "8px", width: "300px" }}>
-              <NewRoomButton size="xl" />
-            </div>
-          }
-          image={"/screenshot4.png"}
-        />
-        <div className={styles.featureSection}>
-          <Feature
-            Icon={IconBrowser}
-            title={`VBrowser`}
-            text="Watch together on a virtual browser running in the cloud."
-          />
-          <Feature
-            Icon={IconBrandYoutubeFilled}
-            title={`YouTube`}
-            text="Watch videos together from YouTube."
-          />
-          <Feature
-            Icon={IconScreenShare}
-            title={`Screensharing`}
-            text="Share a browser tab or your desktop."
-          />
-          <Feature
-            Icon={IconFile}
-            title={`File`}
-            text="Upload and stream your own file."
-          />
-          <Feature
-            Icon={IconLink}
-            title={`URL`}
-            text="Paste in a video URL for everyone to watch from."
-          />
-        </div>
+    <div className={styles.container}>
+      {/* Ambient glow */}
+      <div className={styles.ambientGlow} />
 
-        <Hero
-          heroText={"React to moments together."}
-          subText={"Find moments of shared joy even when you're apart."}
-          image={"/screenshot18.png"}
-          color="green"
-        />
-        <div className={styles.featureSection}>
-          <Feature
-            Icon={IconRefresh}
-            title="Synchronized Play"
-            text="Starts, stops, and seeks are synchronized to everyone, so take those restroom and snack breaks without worrying about falling behind."
-          />
-          <Feature
-            Icon={IconMessageFilled}
-            title="Chat"
-            text="Chat with others in your room. Memes and inside jokes encouraged."
-          />
-          <Feature
-            Icon={IconList}
-            title="Playlists"
-            text="Set up a whole list of videos to play next, and rearrange to your heart's content."
-          />
-          <Feature
-            Icon={IconVideo}
-            title="Video chat"
-            text="Jump into video chat if you'd rather be face-to-face."
-          />
-        </div>
-
-        <Hero
-          heroText={"Theater mode."}
-          subText={
-            "Bring video and chat front-and-center for minimal distractions."
-          }
-          image={"/screenshot14.png"}
-        />
-        <div
-          style={{
-            padding: "30px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          <div className={styles.heroText}>Get started!</div>
-          <div className={styles.featureSection}>
-            <Stepper active={-1}>
-              <Stepper.Step label="Make a room" />
-              <Stepper.Step label="Share link with friends" />
-              <Stepper.Step label="Pick something to watch" />
-              <Stepper.Step label="Success!" />
-            </Stepper>
+      {/* Hero Section */}
+      <section className={styles.hero}>
+        <h1 className={styles.heroTitle}>
+          Watch Together.
+          <br />
+          <span className={styles.heroAccent}>Stay in Sync.</span>
+        </h1>
+        <p className={styles.heroSub}>
+          No login. No download. Just share a link.
+        </p>
+        <div className={styles.heroActions}>
+          <button className={styles.ctaButton} onClick={handleCreateRoom}>
+            <span className={styles.ctaGlow} />
+            Create Room
+          </button>
+          <div className={styles.joinRow}>
+            <input
+              className={styles.joinInput}
+              type="text"
+              placeholder="Paste room link or code..."
+              value={joinCode}
+              onChange={(e) => setJoinCode(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleJoinRoom()}
+            />
+            <button
+              className={styles.joinButton}
+              onClick={handleJoinRoom}
+              disabled={!joinCode.trim()}
+            >
+              Join Room
+            </button>
           </div>
-          {/* <div style={{ width: '160px' }}>
-            <NewRoomButton />
-          </div> */}
         </div>
-      </div>
-      <DiscordBot />
-    </div>
-  );
-};
+      </section>
 
-const Feature = ({
-  Icon,
-  text,
-  title,
-}: {
-  Icon: React.ForwardRefExoticComponent<IconProps>;
-  text: string;
-  title: string;
-}) => {
-  return (
-    <div
-      style={{
-        display: "flex",
-        flex: "1 1 0px",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "10px",
-        minWidth: "180px",
-      }}
-    >
-      <Icon size={80} />
-      <h4 className={styles.featureTitle}>{title}</h4>
-      <div className={styles.featureText}>{text}</div>
-    </div>
-  );
-};
+      {/* Features */}
+      <section className={styles.features}>
+        {features.map((f) => (
+          <div key={f.title} className={styles.featureCard}>
+            <f.Icon size={28} className={styles.featureIcon} />
+            <div className={styles.featureTitle}>{f.title}</div>
+            <div className={styles.featureText}>{f.text}</div>
+          </div>
+        ))}
+      </section>
 
-export const Hero = ({
-  heroText,
-  subText,
-  subText2,
-  action,
-  image,
-  color,
-}: {
-  heroText?: string;
-  subText?: string;
-  subText2?: string;
-  action?: React.ReactNode;
-  image?: string;
-  color?: string;
-}) => {
-  return (
-    <div className={`${styles.hero} ${color === "green" ? styles.green : ""}`}>
-      <div
-        style={{ flexDirection: color === "green" ? "row-reverse" : undefined }}
-        className={styles.heroInner}
-      >
-        <div style={{ padding: "30px", flex: "1 1 0" }}>
-          <div className={styles.heroText}>{heroText}</div>
-          <div className={styles.subText}>{subText}</div>
-          <div className={styles.subText}>{subText2}</div>
-          {action}
+      {/* How it works */}
+      <section className={styles.howItWorks}>
+        <h2 className={styles.sectionTitle}>How it works</h2>
+        <div className={styles.steps}>
+          <div className={styles.step}>
+            <div className={styles.stepNumber}>1</div>
+            <div className={styles.stepText}>Create a room</div>
+          </div>
+          <div className={styles.stepDivider} />
+          <div className={styles.step}>
+            <div className={styles.stepNumber}>2</div>
+            <div className={styles.stepText}>Share the link</div>
+          </div>
+          <div className={styles.stepDivider} />
+          <div className={styles.step}>
+            <div className={styles.stepNumber}>3</div>
+            <div className={styles.stepText}>Pick something to watch</div>
+          </div>
+          <div className={styles.stepDivider} />
+          <div className={styles.step}>
+            <div className={styles.stepNumber}>✓</div>
+            <div className={styles.stepText}>Enjoy together</div>
+          </div>
         </div>
-        <div
-          style={{
-            flex: "1 1 0",
-          }}
-        >
-          <img
-            alt="hero"
-            style={{ width: "100%", borderRadius: "10px" }}
-            src={image}
-          />
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export const DiscordBot = () => {
-  return (
-    <div>
-      <Hero
-        color="green"
-        heroText={
-          "Add the WatchParty Discord bot to your server to easily generate WatchParty links."
-        }
-        subText={"/watch to generate a new empty room"}
-        subText2={"/watch video <URL_HERE> to create a room with a video"}
-        action={
-          <Button
-            leftSection={<IconBrandDiscordFilled />}
-            component="a"
-            size="lg"
-            target="_blank"
-            href="https://discord.com/api/oauth2/authorize?client_id=1071394728513380372&permissions=2147485696&scope=bot"
-          >
-            Add to Discord
-          </Button>
-        }
-        image={"/screenshot5.png"}
-      />
+      </section>
     </div>
   );
 };

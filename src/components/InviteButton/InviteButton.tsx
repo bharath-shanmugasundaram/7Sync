@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { ActionIcon } from "@mantine/core";
+import { Button } from "@mantine/core";
 import { InviteModal } from "../Modal/InviteModal";
-import { IconUserPlus } from "@tabler/icons-react";
+import { IconShare2 } from "@tabler/icons-react";
 
 export const InviteButton = () => {
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
@@ -11,14 +11,19 @@ export const InviteButton = () => {
       {inviteModalOpen && (
         <InviteModal closeInviteModal={() => setInviteModalOpen(false)} />
       )}
-      <ActionIcon
-        size="36px"
-        color="green"
+      <Button
+        size="compact-md"
+        color="#1971c2"
         title="Invite friends"
         onClick={() => setInviteModalOpen(true)}
+        leftSection={<IconShare2 size={16} />}
+        style={{
+          fontWeight: 600,
+          borderRadius: 8,
+        }}
       >
-        <IconUserPlus />
-      </ActionIcon>
+        Invite
+      </Button>
     </>
   );
 };

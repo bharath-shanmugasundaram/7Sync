@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node server/server.ts",
+    "start": "tsx server/server.ts",
     "ui": "vite --host",
-    "dev": "node --watch-path . server/server.ts",
+    "dev": "tsx watch server/server.ts",
     "build": "npm run buildReact && npm run typecheckServer",
     "buildReact": "vite build && npm run typecheck",
     "pm2": "pm2 start server/server.ts",
@@ -73,6 +73,7 @@
     "socket.io-client": "^4.8.1",
     "srt-webvtt": "^2.0.0",
     "twitch-m3u8": "^1.1.5",
+    "tsx": "^4.19.3",
     "typescript": "^5.9.3",
     "vite": "^7.2.7",
     "webtorrent": "^2.8.5"

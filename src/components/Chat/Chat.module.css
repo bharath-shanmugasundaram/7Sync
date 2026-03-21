@@ -1,48 +1,6 @@
 .subscriber {
-  color: rgb(33, 186, 69);
+  color: #1971c2;
 }
-
-/* .subscriber {
-  position: relative;
-} */
-
-/* .subscriber img {
-  border: 3px solid transparent;
-} */
-
-/* .subscriber:before {
-  content: '';
-  background: linear-gradient(
-    60deg,
-    #f79533,
-    #f37055,
-    #ef4e7b,
-    #a166ab,
-    #5073b8,
-    #1098ad,
-    #07b39b,
-    #6fba82
-  );
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-  border-radius: 2px;
-  animation: animatedgradient 2.5s ease infinite;
-  background-size: 200% 200%;
-} */
-
-/* @keyframes animatedgradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-} */
 
 .chatContainer {
   flex-grow: 1;
@@ -50,11 +8,11 @@
 }
 
 .hoverEffect:hover {
-  filter: brightness(0.8);
+  filter: brightness(0.85);
 }
 
 .light {
-  color: gainsboro;
+  color: var(--text-primary);
   font-size: 14px;
 }
 
@@ -63,7 +21,7 @@
 }
 
 .dark {
-  color: gray;
+  color: var(--text-muted);
 }
 
 .small {
@@ -83,24 +41,21 @@
   right: 5px;
   top: -13px;
   padding: 4px !important;
-  border-radius: 3px;
+  border-radius: 6px;
   cursor: pointer;
+  background: var(--name-bg);
 }
 
 .comment .commentMenu:hover,
 .comment.selected .commentMenu {
-  background: rgb(46, 137, 212);
+  background: #1971c2;
   transition: background 0.2s ease-in-out;
 }
 
 .comment:hover,
 .comment.selected {
-  border-radius: 5px;
-  background: radial-gradient(
-    at top right,
-    #7eaee02a,
-    transparent 70%
-  ) !important;
+  border-radius: 8px;
+  background: var(--chat-hover) !important;
 }
 
 .comment:hover .commentMenu,
@@ -111,11 +66,13 @@
 .reactionMenuContainer {
   display: flex;
   flex-wrap: nowrap;
-  border-radius: 5px;
+  border-radius: 8px;
   position: fixed;
   font-size: 24px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.91);
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
 .reactionMenuContainer div {
@@ -124,7 +81,7 @@
 }
 
 .reactionMenuContainer div:hover {
-  background-color: rgb(46, 137, 212);
+  background-color: #e7f1fb;
   transition: background-color 0.2s ease-in-out;
 }
 
@@ -132,20 +89,22 @@
   display: inline-flex;
   align-items: center;
   padding: 3px;
-  border-radius: 5px;
-  background: rgba(255, 255, 255, 0.16);
+  border-radius: 6px;
+  background: var(--name-bg);
   margin-right: 3px;
   margin-top: 1px;
   min-width: 39px;
   cursor: pointer;
+  border: 1px solid transparent;
 }
 
 .reactionContainer.highlighted {
-  background: rgb(66, 111, 129);
+  background: #e7f1fb;
+  border-color: #1971c2;
 }
 
 .reactionContainer:hover {
-  background-color: rgb(46, 137, 212);
+  background-color: #e7f1fb;
   transition: background-color 0.2s ease-in-out;
 }
 
@@ -166,7 +125,7 @@
 
 .reactionCounter-enter {
   transform: scale(0);
-  color: rgb(255, 136, 0) !important;
+  color: #1971c2 !important;
 }
 .reactionCounter-enter-active {
   transform: scale(1);
@@ -174,7 +133,7 @@
 }
 .reactionCounter-exit {
   transform: scale(1);
-  color: rgb(255, 136, 0) !important;
+  color: #1971c2 !important;
 }
 .reactionCounter-exit-active {
   transform: scale(0);

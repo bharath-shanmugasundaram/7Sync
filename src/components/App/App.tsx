@@ -12,7 +12,6 @@ import {
   getOrCreateClientId,
   getOrCreateSessionId,
   calculateMedian,
-  getUserImage,
   isYouTube,
   isMagnet,
   isHttp,
@@ -42,7 +41,7 @@ import { ErrorModal } from "../Modal/ErrorModal";
 import { PasswordModal } from "../Modal/PasswordModal";
 import { ScreenShareModal } from "../Modal/ScreenShareModal";
 import { FileShareModal } from "../Modal/FileShareModal";
-import firebase from "firebase/compat/app";
+// Firebase removed for 7sync
 import { SubtitleModal } from "../Modal/SubtitleModal";
 import { HTML } from "./HTML";
 import { YouTube } from "./YouTube";
@@ -68,6 +67,7 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import { InviteButton } from "../InviteButton/InviteButton";
+import { NameEntryModal } from "../Modal/NameEntryModal";
 import type WebTorrent from "webtorrent";
 import type Hls from "hls.js";
 import { type MediaPlayerClass } from "dashjs";
@@ -170,6 +170,8 @@ interface AppState {
   isLiveStream: boolean;
   settingsModalOpen: boolean;
   uploadController: AbortController | undefined;
+  showNameModal: boolean;
+  isHost: boolean;
 }
 
 export class App extends React.Component<AppProps, AppState> {
@@ -188,7 +190,7 @@ export class App extends React.Component<AppProps, AppState> {
     tsMap: {},
     nameMap: {},
     pictureMap: {},
-    myName: window.localStorage.getItem("watchparty-username") ?? "",
+    myName: "",
     myPicture: "",
     loading: true,
     scrollTimestamp: 0,
@@ -251,6 +253,8 @@ export class App extends React.Component<AppProps, AppState> {
     isLiveStream: false,
     settingsModalOpen: false,
     uploadController: undefined,
+    showNameModal: true,
+    isHost: false,
   };
   socket: Socket = null!;
   mediasoupPubSocket: Socket | null = null;
@@ -290,14 +294,7 @@ export class App extends React.Component<AppProps, AppState> {
     this.setState({ isAutoPlayable: canAutoplay });
     this.loadSettings();
     this.loadYouTube();
-    this.init();
-    if (config.VITE_FIREBASE_CONFIG) {
-      firebase.auth().onAuthStateChanged(async (user: firebase.User | null) => {
-        if (user) {
-          this.loadSignInData(user);
-        }
-      });
-    }
+    // Don't call init() here — wait for name entry modal
   }
 
   componentWillUnmount() {
@@ -355,7 +352,7 @@ export class App extends React.Component<AppProps, AppState> {
         warningMessage: "",
       });
       // Use the name in our state, generate one if empty
-      this.updateName(this.state.myName || (await generateName()));
+      this.updateName(this.state.myName);
       this.loadSignInData(this.context.user);
     });
     socket.on("connect_error", (err: any) => {
@@ -392,6 +389,9 @@ export class App extends React.Component<AppProps, AppState> {
     });
     socket.on("kicked", () => {
       window.location.assign("/");
+    });
+    socket.on("REC:isHost", (isHost: boolean) => {
+      this.setState({ isHost });
     });
     socket.on("REC:play", () => {
       this.localPlay();
@@ -887,30 +887,8 @@ export class App extends React.Component<AppProps, AppState> {
     this.setState({ settings });
   };
 
-  loadSignInData = async (user: firebase.User | undefined) => {
-    if (user && this.socket) {
-      // NOTE: firebase auth doesn't provide the actual first name data that individual providers (G/FB) do
-      // It's accessible at the time the user logs in but not afterward
-      // If we want accurate surname/given name we'll need to save that somewhere
-      const firstName = user.displayName?.split(" ")[0];
-      if (firstName) {
-        // Don't update the username if the user wants to customize their own
-        // Set a flag in localstorage so we only update this once, if the user changes name manually later we won't overwrite
-        // Clear the flag on logout
-        if (!window.localStorage.getItem("watchparty-loginname")) {
-          this.updateName(firstName);
-          window.localStorage.setItem(
-            "watchparty-loginname",
-            Date.now().toString(),
-          );
-        }
-      }
-      const userImage = await getUserImage(user);
-      if (userImage) {
-        this.updatePicture(userImage);
-      }
-      this.updateUid(user);
-    }
+  loadSignInData = async (_user: any) => {
+    // No-op: Firebase auth removed for 7sync
   };
 
   loadYouTube = () => {
@@ -1760,7 +1738,7 @@ export class App extends React.Component<AppProps, AppState> {
   };
 
   roomTogglePlay = () => {
-    if (!this.haveLock()) {
+    if (!this.state.isHost) {
       return;
     }
     if (this.isPauseDisabled()) {
@@ -1892,10 +1870,12 @@ export class App extends React.Component<AppProps, AppState> {
     this.socket.emit("CMD:picture", url);
   };
 
-  updateUid = async (user: firebase.User) => {
-    const uid = user.uid;
-    const token = await user.getIdToken();
-    this.socket.emit("CMD:uid", { uid, token });
+  updateUid = async (user: any) => {
+    const uid = user?.uid;
+    const token = await user?.getIdToken?.();
+    if (uid && token) {
+      this.socket.emit("CMD:uid", { uid, token });
+    }
   };
 
   getMediaDisplayName = (input?: string) => {
@@ -2004,7 +1984,8 @@ export class App extends React.Component<AppProps, AppState> {
         subtitled={this.Player().isSubtitled()}
         currentTime={this.Player().getCurrentTime()}
         duration={this.Player().getDuration()}
-        disabled={!this.haveLock()}
+        disabled={!this.state.isHost}
+        isHost={this.state.isHost}
         leaderTime={this.hasDuration() ? this.getLeaderTime() : undefined}
         isPauseDisabled={this.isPauseDisabled()}
         playbackRate={this.Player().getPlaybackRate()}
@@ -2073,6 +2054,14 @@ export class App extends React.Component<AppProps, AppState> {
         )}
         {this.state.overlayMsg && <ErrorModal error={this.state.overlayMsg} />}
         {this.state.isErrorAuth && <PasswordModal roomId={this.state.roomId} />}
+        <NameEntryModal
+          isOpen={this.state.showNameModal}
+          onSubmit={(name: string) => {
+            this.setState({ myName: name, showNameModal: false }, () => {
+              this.init();
+            });
+          }}
+        />
         <SettingsModal
           modalOpen={this.state.settingsModalOpen}
           setModalOpen={this.setSettingsModalOpen}
@@ -2199,7 +2188,8 @@ export class App extends React.Component<AppProps, AppState> {
                         !this.playingVBrowser() && (
                           <Button
                             className={styles.shareButton}
-                            color="blue"
+                            variant="light"
+                            color="#1971c2"
                             disabled={!this.haveLock()}
                             onClick={() => {
                               this.setState({
@@ -2217,7 +2207,8 @@ export class App extends React.Component<AppProps, AppState> {
                           <Button
                             className={styles.shareButton}
                             disabled={!this.haveLock()}
-                            color="green"
+                            variant="light"
+                            color="#1971c2"
                             onClick={() => {
                               this.setState({
                                 isVBrowserModalOpen: true,
@@ -2322,7 +2313,8 @@ export class App extends React.Component<AppProps, AppState> {
                         !this.playingVBrowser() && (
                           <Button
                             className={styles.shareButton}
-                            color="violet"
+                            variant="light"
+                            color="#1971c2"
                             disabled={!this.haveLock()}
                             onClick={() => {
                               this.setState({
@@ -2368,10 +2360,11 @@ export class App extends React.Component<AppProps, AppState> {
                       <Menu>
                         <Menu.Target>
                           <Button
-                            color="grey"
+                            variant="light"
+                            color="#1971c2"
                             leftSection={<IconList />}
                             rightSection={
-                              <Badge circle>{playlist.length}</Badge>
+                              <Badge circle color="#1971c2">{playlist.length}</Badge>
                             }
                             className={styles.shareButton}
                           >
@@ -2601,37 +2594,32 @@ export class App extends React.Component<AppProps, AppState> {
               }`}
             >
               <div style={{ display: "flex", width: "100%", gap: "4px" }}>
-                <TextInput
-                  // description="Name"
+                <div
                   style={{
                     visibility: this.state.showChatColumn
                       ? undefined
                       : "hidden",
                     flexGrow: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "6px 12px",
+                    background: "var(--name-bg)",
+                    borderRadius: "8px",
+                    fontSize: "14px",
+                    color: "var(--name-text)",
+                    fontWeight: 500,
                   }}
-                  value={this.state.myName}
-                  onChange={(e) => {
-                    this.updateName(e.target.value);
-                  }}
-                  onFocus={(e) => e.target.select()}
-                  leftSection={<IconUser />}
-                  rightSectionWidth={70}
-                  rightSection={
-                    <Button
-                      size="compact-xs"
-                      onClick={async () =>
-                        this.updateName(await generateName())
-                      }
-                    >
-                      Random
-                    </Button>
-                  }
-                />
+                >
+                  <IconUser size={16} style={{ color: "var(--text-muted)" }} />
+                  {this.state.myName}
+                </div>
                 <InviteButton />
               </div>
               <div style={{ display: "flex", gap: "4px" }}>
                 <Button
-                  color="grey"
+                  variant="light"
+                  color="#1971c2"
                   onClick={() =>
                     this.setState({
                       showPeopleColumn: !this.state.showPeopleColumn,
@@ -2640,13 +2628,14 @@ export class App extends React.Component<AppProps, AppState> {
                   fullWidth
                   leftSection={<IconUsersGroup />}
                   rightSection={
-                    <Badge circle>{this.state.participants.length}</Badge>
+                    <Badge circle color="#1971c2">{this.state.participants.length}</Badge>
                   }
                 >
                   People
                 </Button>
                 <Button
-                  color="grey"
+                  variant="light"
+                  color="#1971c2"
                   title="Settings"
                   fullWidth
                   onClick={() => {
@@ -2661,8 +2650,9 @@ export class App extends React.Component<AppProps, AppState> {
                 <div
                   style={{
                     position: "absolute",
-                    background: "rgba(10, 10, 10, 0.6)",
+                    background: "var(--bg-primary)",
                     zIndex: 200,
+                    borderTop: "1px solid var(--border-card)",
                     left: 0,
                     top: 76,
                     height: this.state.showPeopleColumn

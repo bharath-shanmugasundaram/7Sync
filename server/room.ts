@@ -56,6 +56,7 @@ export class Room {
   public playlist: PlaylistVideo[] = [];
 
   // Non-serialized state
+  public hostClientId: string | null = null; // clientId of the room host (first to connect)
   public roomId: string;
   public roster: User[] = [];
   private lastTsMap = Date.now();
@@ -218,6 +219,16 @@ export class Room {
       socket.uid = "";
       socket.isSub = false;
 
+      // Set this socket as host if room has no host yet
+      if (!this.hostClientId) {
+        this.hostClientId = clientId;
+      }
+      // Tell this socket if they're the room host
+      socket.emit("REC:isHost", clientId === this.hostClientId);
+
+      // Check if this socket is the room host (first to connect)
+      const validateHost = () => socket.clientId === this.hostClientId;
+
       // Check if this socket matches this.lock UID
       const validateLock = () => {
         return !this.lock || socket.uid === this.lock;
@@ -256,22 +267,22 @@ export class Room {
         }
       });
       socket.on("CMD:host", (data: unknown) => {
-        validateLock() && this.startHosting(socket, String(data));
+        validateHost() && this.startHosting(socket, String(data));
       });
       socket.on("CMD:play", () => {
-        validateLock() && this.playVideo(socket);
+        validateHost() && this.playVideo(socket);
       });
       socket.on("CMD:pause", () => {
-        validateLock() && this.pauseVideo(socket);
+        validateHost() && this.pauseVideo(socket);
       });
       socket.on("CMD:seek", (data: unknown) => {
-        validateLock() && this.seekVideo(socket, Number(data));
+        validateHost() && this.seekVideo(socket, Number(data));
       });
       socket.on("CMD:playbackRate", (data: unknown) => {
-        validateLock() && this.setPlaybackRate(socket, Number(data));
+        validateHost() && this.setPlaybackRate(socket, Number(data));
       });
       socket.on("CMD:loop", (data: unknown) => {
-        validateLock() && this.setLoop(Boolean(data));
+        validateHost() && this.setLoop(Boolean(data));
       });
       socket.on("CMD:ts", (data: unknown) =>
         this.setTimestamp(socket, Number(data)),
@@ -322,16 +333,16 @@ export class Room {
         (await validateOwner()) && this.setRoomOwner(socket, data);
       });
       socket.on("CMD:playlistNext", (data: unknown) => {
-        validateLock() && this.playlistNext(data);
+        validateHost() && this.playlistNext(data);
       });
       socket.on("CMD:playlistAdd", (data: unknown) => {
-        validateLock() && this.playlistAdd(socket, String(data));
+        validateHost() && this.playlistAdd(socket, String(data));
       });
       socket.on("CMD:playlistMove", (data: unknown) => {
-        validateLock() && this.playlistMove(data);
+        validateHost() && this.playlistMove(data);
       });
       socket.on("CMD:playlistDelete", (data: unknown) => {
-        validateLock() && this.playlistDelete(Number(data));
+        validateHost() && this.playlistDelete(Number(data));
       });
       socket.on("CMD:kickUser", async (data: unknown) => {
         (await validateOwner()) && this.kickUser(data);
