@@ -551,7 +551,7 @@ export class Room {
     this.playbackRate = 1;
     this.tsMap = {};
     this.preventTSUpdate = true;
-    setTimeout(() => (this.preventTSUpdate = false), 1000);
+    setTimeout(() => (this.preventTSUpdate = false), 3000);
     this.io.of(this.roomId).emit("REC:tsMap", this.tsMap);
     this.io.of(this.roomId).emit("REC:host", this.getHostState());
     if (socket && data) {
@@ -580,7 +580,7 @@ export class Room {
       chatWithTime.isSub = true;
     }
     this.chat.push(chatWithTime);
-    this.chat = this.chat.splice(-100);
+    this.chat = this.chat.slice(-100);
     this.io.of(this.roomId).emit("REC:chat", chatWithTime);
   };
 
@@ -812,20 +812,25 @@ export class Room {
     if (String(data).length > 100) {
       return;
     }
+    if (typeof data !== "number" || !isFinite(data)) {
+      return;
+    }
     // Prevent lagging TS updates from the old video from messing up our timestamps
     if (this.preventTSUpdate) {
       return;
     }
-    // This is negative for live streams, so allow overwriting
-    // Otherwise, only increment this value to prevent a lagging viewer from holding up the room state
-    if (data < 0 || data > this.videoTS) {
-      this.videoTS = data;
+    // Only allow the host to update the authoritative videoTS
+    // This prevents a viewer with a fast clock from fast-forwarding the room
+    if (socket.clientId === this.hostClientId) {
+      // This is negative for live streams, so allow overwriting
+      if (data < 0 || data > this.videoTS) {
+        this.videoTS = data;
+      }
     }
     // Normalize the received TS based on how long since the last tsMap emit
     // Later sends will have higher values so subtract the difference
     // Add 1 as we will emit 1 second from the last one
     const timeSinceTsMap = Date.now() - this.lastTsMap;
-    // console.log(socket.clientId, 'offset', offset, 'ms');
     this.tsMap[socket.clientId] = data - timeSinceTsMap / 1000 + 1;
   };
 
@@ -1229,9 +1234,10 @@ export class Room {
     if (this.isChatDisabled === undefined) {
       this.isChatDisabled = Boolean(first?.isChatDisabled);
     }
-    // TODO only send the password if this is current owner
+    // Only send the password to the room owner
+    const isOwner = socket.uid && first?.owner === socket.uid;
     socket.emit("REC:getRoomState", {
-      password: first?.password,
+      password: isOwner ? first?.password : undefined,
       vanity: first?.vanity,
       owner: first?.owner,
       isChatDisabled: first?.isChatDisabled,
@@ -1295,8 +1301,12 @@ export class Room {
       socket.emit("errorMessage", "Media source too long");
       return;
     }
-    // console.log(owner, vanity, password);
-    const roomObj: any = {
+    // Use explicit column names to prevent SQL injection via dynamic keys
+    const allowedColumns = new Set([
+      "roomId", "password", "isChatDisabled", "mediaPath",
+      "vanity", "roomTitle", "roomDescription", "roomTitleColor",
+    ]);
+    const roomObj: Record<string, any> = {
       roomId: this.roomId,
       password: password,
       isChatDisabled: isChatDisabled,
@@ -1312,21 +1322,23 @@ export class Room {
       roomObj.roomTitleColor = roomTitleColor;
     }
     try {
+      // Validate column names against allowlist
+      const keys = Object.keys(roomObj).filter((k) => allowedColumns.has(k));
+      const values = keys.map((k) => roomObj[k]);
       const query = `UPDATE room
-        SET ${Object.keys(roomObj).map((k, i) => `"${k}" = $${i + 1}`)}
-        WHERE "roomId" = $${Object.keys(roomObj).length + 1}
-        AND owner = $${Object.keys(roomObj).length + 2}
+        SET ${keys.map((k, i) => `"${k}" = $${i + 1}`)}
+        WHERE "roomId" = $${keys.length + 1}
+        AND owner = $${keys.length + 2}
         RETURNING *`;
       const result = await postgres.query(query, [
-        ...Object.values(roomObj),
+        ...values,
         this.roomId,
         uid,
       ]);
       const row = result.rows[0];
       this.isChatDisabled = Boolean(row?.isChatDisabled);
-      // TODO only send password if current owner
+      // Broadcast non-sensitive state to all users
       this.io.of(this.roomId).emit("REC:getRoomState", {
-        password: row?.password,
         vanity: row?.vanity,
         owner: row?.owner,
         isChatDisabled: row?.isChatDisabled,
@@ -1334,6 +1346,10 @@ export class Room {
         roomDescription: row?.roomDescription,
         roomTitleColor: row?.roomTitleColor,
         mediaPath: row?.mediaPath,
+      });
+      // Send password only to the owner who made the change
+      socket.emit("REC:getRoomState", {
+        password: row?.password,
       });
       socket.emit("successMessage", "Saved admin settings");
     } catch (e) {

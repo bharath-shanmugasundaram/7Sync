@@ -70,25 +70,39 @@ io.engine.use(async (req: any, res: Response, next: () => void) => {
       [key],
     )
   )?.rows?.[0];
-  // Don't await after this because we may have a race condition where 2 rquests both try to load the room
+  // Use a loading promise map to prevent race conditions where 2 requests both try to load the same room
   if (isCorrectShard && !rooms.has(key)) {
-    const data = persistedRoom?.data
-      ? JSON.stringify(persistedRoom.data)
-      : undefined;
-    if (data) {
-      const room = new Room(io, key, data);
-      rooms.set(key, room);
-      console.log(
-        "loading room %s into memory on shard %s",
-        roomId,
-        config.SHARD,
-      );
+    if (!roomLoadingPromises.has(key)) {
+      const loadPromise = (async () => {
+        try {
+          const data = persistedRoom?.data
+            ? JSON.stringify(persistedRoom.data)
+            : undefined;
+          if (data && !rooms.has(key)) {
+            const room = new Room(io, key, data);
+            rooms.set(key, room);
+            console.log(
+              "loading room %s into memory on shard %s",
+              roomId,
+              config.SHARD,
+            );
+          }
+        } finally {
+          roomLoadingPromises.delete(key);
+        }
+      })();
+      roomLoadingPromises.set(key, loadPromise);
+      await loadPromise;
+    } else {
+      await roomLoadingPromises.get(key);
     }
   }
   next();
 });
 
 const rooms = new Map<string, Room>();
+// Track rooms currently being loaded to prevent race conditions
+const roomLoadingPromises = new Map<string, Promise<void>>();
 // Following functions iterate over in-memory rooms
 setInterval(minuteMetrics, 60 * 1000);
 setInterval(release, releaseInterval);
@@ -791,3 +805,28 @@ function computeOpenSubtitlesHash(first: Buffer, last: Buffer, size: number) {
     }
   }
 }
+
+// Graceful shutdown: save all rooms before exiting
+async function gracefulShutdown(signal: string) {
+  console.log(`Received ${signal}. Saving rooms and shutting down...`);
+  try {
+    // Save all rooms one final time
+    for (const [, room] of rooms) {
+      try {
+        await room.saveRoom();
+      } catch (e) {
+        console.error("Error saving room during shutdown:", e);
+      }
+    }
+    io.close();
+    server?.close();
+    console.log("Graceful shutdown complete.");
+    process.exit(0);
+  } catch (e) {
+    console.error("Error during graceful shutdown:", e);
+    process.exit(1);
+  }
+}
+
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));

@@ -262,6 +262,7 @@ export class App extends React.Component<AppProps, AppState> {
   ytDebounce = true;
   localStreamToPublish?: MediaStream;
   isLocalStreamAFile = false;
+  tsIntervalId: ReturnType<typeof setInterval> | null = null;
   publisherConns: PCDict = {};
   consumerConn?: RTCPeerConnection;
   progressUpdater?: number;
@@ -301,6 +302,10 @@ export class App extends React.Component<AppProps, AppState> {
     document.removeEventListener("fullscreenchange", this.onFullScreenChange);
     document.removeEventListener("keydown", this.onKeydown);
     window.clearInterval(this.heartbeat);
+    if (this.tsIntervalId) {
+      clearInterval(this.tsIntervalId);
+      this.tsIntervalId = null;
+    }
   }
 
   init = async () => {
@@ -470,6 +475,16 @@ export class App extends React.Component<AppProps, AppState> {
             this.HTMLInterface.pauseVideo();
           }
           this.YouTubeInterface.stopVideo();
+
+          // Destroy previous media loaders to prevent leaks on rapid media changes
+          if (window.watchparty.hls) {
+            window.watchparty.hls.destroy();
+            window.watchparty.hls = undefined;
+          }
+          if (window.watchparty.dash) {
+            window.watchparty.dash.reset();
+            window.watchparty.dash = undefined;
+          }
 
           if (!this.isLocalStreamAFile) {
             this.Player().clearState();
@@ -700,12 +715,9 @@ export class App extends React.Component<AppProps, AppState> {
       ) {
         new Audio("/clearly.mp3").play();
       }
-      this.state.chat.push(data);
-      if (this.state.chat.length > 100) {
-        this.state.chat.shift();
-      }
+      const updatedChat = [...this.state.chat, data].slice(-100);
       this.setState({
-        chat: this.state.chat,
+        chat: updatedChat,
         scrollTimestamp: Date.now(),
         unreadCount:
           this.state.currentTab === "chat"
@@ -714,17 +726,17 @@ export class App extends React.Component<AppProps, AppState> {
       });
     });
     socket.on("REC:addReaction", (data: Reaction) => {
-      const { chat } = this.state;
+      const chat = [...this.state.chat];
       const msgIndex = chat.findIndex(
         (m) => m.id === data.msgId && m.timestamp === data.msgTimestamp,
       );
       if (msgIndex === -1) {
         return;
       }
-      const msg = chat[msgIndex];
-      msg.reactions = msg.reactions || {};
-      msg.reactions[data.value] = msg.reactions[data.value] || [];
-      msg.reactions[data.value].push(data.user);
+      const msg = { ...chat[msgIndex] };
+      msg.reactions = { ...msg.reactions } || {};
+      msg.reactions[data.value] = [...(msg.reactions[data.value] || []), data.user];
+      chat[msgIndex] = msg;
       this.setState({ chat }, () => {
         // if we add a reaction to the last message we need to scroll down
         // or else the reaction icon might be hidden
@@ -737,16 +749,22 @@ export class App extends React.Component<AppProps, AppState> {
       });
     });
     socket.on("REC:removeReaction", (data: Reaction) => {
-      const { chat } = this.state;
-      const msg = chat.find(
+      const chat = [...this.state.chat];
+      const msgIndex = chat.findIndex(
         (m) => m.id === data.msgId && m.timestamp === data.msgTimestamp,
       );
-      if (!msg || !msg.reactions?.[data.value]) {
+      if (msgIndex === -1) {
         return;
       }
+      const msg = { ...chat[msgIndex] };
+      if (!msg.reactions?.[data.value]) {
+        return;
+      }
+      msg.reactions = { ...msg.reactions };
       msg.reactions[data.value] = msg.reactions[data.value].filter(
         (id) => id !== data.user,
       );
+      chat[msgIndex] = msg;
       this.setState({ chat });
     });
     socket.on("REC:tsMap", (data: NumberDict) => {
@@ -859,7 +877,11 @@ export class App extends React.Component<AppProps, AppState> {
       },
     );
     socket.on("REC:getRoomState", this.handleRoomState);
-    window.setInterval(() => {
+    // Clear any previous timestamp interval to prevent duplicates on reconnect
+    if (this.tsIntervalId) {
+      clearInterval(this.tsIntervalId);
+    }
+    this.tsIntervalId = window.setInterval(() => {
       if (this.state.roomMedia) {
         const toSend = this.getRoomTSToSet(this.Player().getCurrentTime());
         this.socket.emit("CMD:ts", toSend);
@@ -1940,10 +1962,14 @@ export class App extends React.Component<AppProps, AppState> {
   };
 
   getLeaderTime = () => {
-    if (this.state.participants.length > 2) {
-      return calculateMedian(Object.values(this.state.tsMap));
+    const values = Object.values(this.state.tsMap);
+    if (values.length === 0) {
+      return 0;
     }
-    return Math.max(...Object.values(this.state.tsMap));
+    if (this.state.participants.length > 2) {
+      return calculateMedian(values);
+    }
+    return Math.max(...values);
   };
 
   onVideoEnded = (url: string) => {
