@@ -20,6 +20,10 @@
   .announce {
     bottom: 0px;
     top: initial;
+    width: calc(100% - 16px);
+    left: 8px;
+    transform: none;
+    border-radius: 8px 8px 0 0;
   }
 }
 

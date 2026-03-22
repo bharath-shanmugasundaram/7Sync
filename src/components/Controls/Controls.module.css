@@ -18,6 +18,8 @@
 @media only screen and (max-width: 600px) {
   .controls {
     flex-wrap: wrap;
+    padding: 6px 8px;
+    gap: 6px;
   }
 }
 
@@ -27,6 +29,12 @@
   color: rgba(255, 255, 255, 0.9);
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
   letter-spacing: 0.2px;
+}
+
+@media (max-width: 600px) {
+  .text {
+    font-size: 0.72em;
+  }
 }
 
 .action {
@@ -39,4 +47,15 @@
 .action:hover {
   color: #ffffff;
   transform: scale(1.08);
+}
+
+@media (max-width: 600px) {
+  .action {
+    padding: 4px;
+    min-width: 32px;
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }

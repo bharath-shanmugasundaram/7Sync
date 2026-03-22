@@ -65,6 +65,7 @@ import {
   IconUsersGroup,
   IconVolume,
   IconX,
+  IconMessageCircle,
 } from "@tabler/icons-react";
 import { InviteButton } from "../InviteButton/InviteButton";
 import { NameEntryModal } from "../Modal/NameEntryModal";
@@ -2179,7 +2180,7 @@ export class App extends React.Component<AppProps, AppState> {
         {
           <div
             className={styles.mobileStack}
-            style={{ margin: "0 8px", display: "flex", columnGap: "32px" }}
+            style={{ margin: isMobile() ? "0 4px" : "0 8px", display: "flex", columnGap: isMobile() ? "0" : "32px" }}
           >
             <div
               className={
@@ -2627,9 +2628,20 @@ export class App extends React.Component<AppProps, AppState> {
               style={{
                 display: "flex",
                 flexDirection: "column",
-                position: "relative",
-                width: this.state.showChatColumn ? 380 : 0,
-                maxWidth: 380,
+                position: isMobile() ? (this.state.showChatColumn ? "fixed" : "absolute") : "relative",
+                ...(isMobile() ? {
+                  top: this.state.showChatColumn ? 52 : undefined,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  width: this.state.showChatColumn ? "100%" : 0,
+                  height: this.state.showChatColumn ? "calc(100vh - 52px)" : 0,
+                  zIndex: 140,
+                  background: "var(--bg-primary)",
+                } : {
+                  width: this.state.showChatColumn ? 380 : 0,
+                  maxWidth: 380,
+                }),
                 overflow: "hidden",
                 gap: "6px",
               }}
@@ -2741,6 +2753,16 @@ export class App extends React.Component<AppProps, AppState> {
             </div>
           </div>
         }
+        {isMobile() && (
+          <button
+            className={styles.mobileToggleChat}
+            onClick={() => {
+              this.setState({ showChatColumn: !this.state.showChatColumn });
+            }}
+          >
+            {this.state.showChatColumn ? <IconX size={22} /> : <IconMessageCircle size={22} />}
+          </button>
+        )}
       </React.Fragment>
     );
   }
