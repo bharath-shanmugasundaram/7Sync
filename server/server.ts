@@ -659,7 +659,8 @@ app.use(
   }),
 );
 // Send index.html for all other requests (SPA) — never cache to prevent stale JS references after deploy
-app.use("/*splat", (_req, res) => {
+// Note: Express 5's /*splat does not match bare "/", so we need a separate handler for "/"
+const spaHandler = (_req: any, res: any) => {
   res.set("Cache-Control", "no-cache, no-store, must-revalidate");
   res.set("Pragma", "no-cache");
   res.set("Expires", "0");
@@ -668,7 +669,9 @@ app.use("/*splat", (_req, res) => {
       import.meta.dirname + `/../${config.BUILD_DIRECTORY}/index.html`,
     ),
   );
-});
+};
+app.get("/", spaHandler);
+app.use("/*splat", spaHandler);
 
 async function saveRooms() {
   // Unload rooms that are empty and idle
