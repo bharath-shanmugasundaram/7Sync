@@ -173,6 +173,15 @@ interface AppState {
   uploadController: AbortController | undefined;
   showNameModal: boolean;
   isHost: boolean;
+  voiceMessages: VoiceMessageItem[];
+}
+
+export interface VoiceMessageItem {
+  from: string;
+  name: string;
+  audio: string;
+  mimeType: string;
+  timestamp: string;
 }
 
 export class App extends React.Component<AppProps, AppState> {
@@ -232,10 +241,10 @@ export class App extends React.Component<AppProps, AppState> {
     showChatColumn: isMobile()
       ? true
       : Boolean(
-          Number(
-            window.localStorage.getItem("watchparty-showchatcolumn") ?? "1",
-          ),
+        Number(
+          window.localStorage.getItem("watchparty-showchatcolumn") ?? "1",
         ),
+      ),
     showPeopleColumn: false,
     // Boolean(
     //       Number(
@@ -256,6 +265,7 @@ export class App extends React.Component<AppProps, AppState> {
     uploadController: undefined,
     showNameModal: true,
     isHost: false,
+    voiceMessages: [],
   };
   socket: Socket = null!;
   mediasoupPubSocket: Socket | null = null;
@@ -359,6 +369,9 @@ export class App extends React.Component<AppProps, AppState> {
       });
       // Use the name in our state, generate one if empty
       this.updateName(this.state.myName);
+      if (this.state.myPicture) {
+        this.updatePicture(this.state.myPicture);
+      }
       this.loadSignInData(this.context.user);
     });
     socket.on("connect_error", (err: any) => {
@@ -706,6 +719,11 @@ export class App extends React.Component<AppProps, AppState> {
           }
         },
       );
+    });
+    socket.on("REC:voiceMessage", (data: VoiceMessageItem) => {
+      this.setState((prev) => ({
+        voiceMessages: [...prev.voiceMessages, data],
+      }));
     });
     socket.on("REC:chat", (data: ChatMessage) => {
       if (
@@ -1903,6 +1921,7 @@ export class App extends React.Component<AppProps, AppState> {
   updatePicture = (url: string) => {
     this.setState({ myPicture: url });
     this.socket.emit("CMD:picture", url);
+    window.localStorage.setItem("watchparty-avatar", url);
   };
 
   updateUid = async (user: any) => {
@@ -2095,8 +2114,8 @@ export class App extends React.Component<AppProps, AppState> {
         {this.state.isErrorAuth && <PasswordModal roomId={this.state.roomId} />}
         <NameEntryModal
           isOpen={this.state.showNameModal}
-          onSubmit={(name: string) => {
-            this.setState({ myName: name, showNameModal: false }, () => {
+          onSubmit={(name: string, avatarUrl: string) => {
+            this.setState({ myName: name, myPicture: avatarUrl, showNameModal: false }, () => {
               this.init();
             });
           }}
@@ -2528,8 +2547,8 @@ export class App extends React.Component<AppProps, AppState> {
                       src="https://www.youtube.com/embed/?enablejsapi=1&controls=0&rel=0"
                     />
                     {this.playingVBrowser() &&
-                    this.getVBrowserPass() &&
-                    this.getVBrowserHost() ? (
+                      this.getVBrowserPass() &&
+                      this.getVBrowserHost() ? (
                       <VBrowser
                         username={clientId}
                         password={this.getVBrowserPass()}
@@ -2551,7 +2570,7 @@ export class App extends React.Component<AppProps, AppState> {
                         style={{
                           display:
                             (this.usingNative() && !this.state.loading) ||
-                            this.state.fullScreen
+                              this.state.fullScreen
                               ? "block"
                               : "none",
                           width: "100%",
@@ -2645,13 +2664,12 @@ export class App extends React.Component<AppProps, AppState> {
                 overflow: "hidden",
                 gap: "6px",
               }}
-              className={`${
-                (this.state.fullScreen
-                  ? styles.fullHeightColumnFullscreen
-                  : styles.fullHeightColumn) +
+              className={`${(this.state.fullScreen
+                ? styles.fullHeightColumnFullscreen
+                : styles.fullHeightColumn) +
                 " " +
                 styles.rightColumn
-              }`}
+                }`}
             >
               <div style={{ display: "flex", width: "100%", gap: "6px" }}>
                 <div
@@ -2749,6 +2767,7 @@ export class App extends React.Component<AppProps, AppState> {
                 owner={this.state.owner}
                 ref={this.chatRef}
                 hide={!this.state.showChatColumn}
+                voiceMessages={this.state.voiceMessages}
               />
             </div>
           </div>

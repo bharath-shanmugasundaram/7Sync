@@ -71,13 +71,13 @@ export class Room {
   // If we want a real queue then we need external processing of the jobs and a way to update the room from outside
   public vBrowserQueue:
     | {
-        roomId: string;
-        queueTime: Date;
-        isLarge: boolean;
-        region: string;
-        uid: string;
-        clientId: string;
-      }
+      roomId: string;
+      queueTime: Date;
+      isLarge: boolean;
+      region: string;
+      uid: string;
+      clientId: string;
+    }
     | undefined = undefined;
 
   constructor(
@@ -356,6 +356,9 @@ export class Room {
       );
       socket.on("signalSS", (data: unknown) =>
         this.sendSignal(socket, data, "signalSS"),
+      );
+      socket.on("CMD:voiceMessage", (data: unknown) =>
+        this.sendVoiceMessage(socket, data),
       );
 
       socket.on("disconnect", () => this.onDisconnect(socket));
@@ -1375,6 +1378,23 @@ export class Room {
         sharer: data.sharer,
       });
     }
+  };
+
+  private sendVoiceMessage = (socket: Socket, raw: unknown) => {
+    const data = raw as { audio: string; mimeType: string };
+    if (!data || !data.audio || !data.mimeType) return;
+    if (data.audio.length > 2000000) return; // 2MB cap
+    const payload = {
+      from: socket.clientId,
+      name: this.nameMap[socket.clientId] || socket.clientId,
+      audio: data.audio,
+      mimeType: data.mimeType,
+      timestamp: new Date().toISOString(),
+    };
+    // Broadcast to all other clients in the room
+    socket.broadcast.emit("REC:voiceMessage", payload);
+    // Echo back to the sender so they see their own message
+    socket.emit("REC:voiceMessage", payload);
   };
 
   private onDisconnect = (socket: Socket) => {

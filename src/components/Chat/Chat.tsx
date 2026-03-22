@@ -30,6 +30,8 @@ import {
   TransitionGroup,
 } from "react-transition-group";
 import { MetadataContext } from "../../MetadataContext";
+import VoiceChat, { VoiceChatHandle } from "../VoiceChat/VoiceChat";
+import { VoiceMessageItem } from "../App/App";
 
 const clientId = getOrCreateClientId();
 
@@ -45,6 +47,7 @@ interface ChatProps {
   isChatDisabled?: boolean;
   owner: string | undefined;
   ref: RefObject<Chat>;
+  voiceMessages: VoiceMessageItem[];
 }
 
 export class Chat extends React.Component<ChatProps> {
@@ -54,6 +57,8 @@ export class Chat extends React.Component<ChatProps> {
     chatMsg: "",
     isNearBottom: true,
     isPickerOpen: false,
+    isVoiceRecording: false,
+    voiceSeconds: 0,
     reactionMenu: {
       isOpen: false,
       selectedMsgId: "",
@@ -63,6 +68,14 @@ export class Chat extends React.Component<ChatProps> {
     },
   };
   messagesRef = React.createRef<HTMLDivElement>();
+  voiceChatRef = React.createRef<VoiceChatHandle>();
+
+  handleVoiceRecordingChange = (isRecording: boolean, seconds: number) => {
+    this.setState({ isVoiceRecording: isRecording, voiceSeconds: seconds });
+  };
+
+  fmtVoiceTime = (s: number) =>
+    `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
   async componentDidMount() {
     this.scrollToBottom();
@@ -143,9 +156,9 @@ export class Chat extends React.Component<ChatProps> {
     return (
       this.messagesRef.current &&
       this.messagesRef.current.scrollHeight -
-        this.messagesRef.current.scrollTop -
-        this.messagesRef.current.offsetHeight <
-        50
+      this.messagesRef.current.scrollTop -
+      this.messagesRef.current.offsetHeight <
+      50
     );
   };
 
@@ -233,27 +246,84 @@ export class Chat extends React.Component<ChatProps> {
           style={{ position: "relative" }}
         >
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            {this.props.chat.map((msg) => (
-              <ChatMessage
-                key={msg.timestamp + msg.id}
-                className={
-                  msg.id === this.state.reactionMenu.selectedMsgId &&
-                  msg.timestamp === this.state.reactionMenu.selectedMsgTimestamp
-                    ? styles.selected
-                    : ""
+            {(() => {
+              // Merge and sort chat + voice messages by timestamp
+              type Item =
+                | { kind: "chat"; data: ChatMessage }
+                | { kind: "voice"; data: VoiceMessageItem };
+              const items: Item[] = [
+                ...this.props.chat.map((m) => ({ kind: "chat" as const, data: m })),
+                ...this.props.voiceMessages.map((m) => ({ kind: "voice" as const, data: m })),
+              ].sort((a, b) =>
+                a.data.timestamp < b.data.timestamp ? -1 : a.data.timestamp > b.data.timestamp ? 1 : 0,
+              );
+
+              return items.map((item, i) => {
+                if (item.kind === "voice") {
+                  const msg = item.data;
+                  const isMine = msg.from === clientId;
+                  const label = isMine ? "You" : (msg.name || "?").split(" ")[0];
+                  const time = new Date(msg.timestamp).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  });
+                  return (
+                    <div
+                      key={"voice-" + msg.timestamp + msg.from + i}
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: isMine ? "flex-end" : "flex-start",
+                        gap: "3px",
+                      }}
+                    >
+                      <span style={{ fontSize: "10px", color: "var(--mantine-color-dimmed, #888)", paddingInline: "4px" }}>
+                        {label} · {time}
+                      </span>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          padding: "6px 12px",
+                          borderRadius: isMine ? "16px 16px 2px 16px" : "16px 16px 16px 2px",
+                          background: isMine ? "linear-gradient(135deg, #1d4ed8, #2563eb)" : "var(--mantine-color-dark-6, #2C2E33)",
+                          color: isMine ? "white" : "inherit",
+                          boxShadow: "0 2px 5px rgba(0,0,0,0.15)",
+                          maxWidth: "88%",
+                        }}
+                      >
+                        <VoicePlayer src={`data:${msg.mimeType};base64,${msg.audio}`} isMine={isMine} />
+                      </div>
+                    </div>
+                  );
                 }
-                message={msg}
-                pictureMap={this.props.pictureMap}
-                nameMap={this.props.nameMap}
-                formatMessage={this.formatMessage}
-                owner={this.props.owner}
-                socket={this.props.socket}
-                isChatDisabled={this.props.isChatDisabled}
-                setReactionMenu={this.setReactionMenu}
-                handleReactionClick={this.handleReactionClick}
-              />
-            ))}
-            {/* <div ref={this.messagesEndRef} /> */}
+
+                const msg = item.data;
+                const isMine = Boolean(msg.id && msg.id === clientId && !msg.system && !msg.cmd);
+                return (
+                  <ChatMessage
+                    key={msg.timestamp + msg.id}
+                    isMine={isMine}
+                    className={
+                      msg.id === this.state.reactionMenu.selectedMsgId &&
+                        msg.timestamp === this.state.reactionMenu.selectedMsgTimestamp
+                        ? styles.selected
+                        : ""
+                    }
+                    message={msg}
+                    pictureMap={this.props.pictureMap}
+                    nameMap={this.props.nameMap}
+                    formatMessage={this.formatMessage}
+                    owner={this.props.owner}
+                    socket={this.props.socket}
+                    isChatDisabled={this.props.isChatDisabled}
+                    setReactionMenu={this.setReactionMenu}
+                    handleReactionClick={this.handleReactionClick}
+                  />
+                );
+              });
+            })()}
           </div>
           {!this.state.isNearBottom && (
             <Button
@@ -321,35 +391,112 @@ export class Chat extends React.Component<ChatProps> {
             xPosition={this.state.reactionMenu.xPosition}
           /> */}
         </CSSTransition>
-        <TextInput
-          style={{ marginTop: "10px" }}
-          onKeyDown={(e: any) => e.key === "Enter" && this.sendChatMsg()}
-          onChange={this.updateChatMsg}
-          value={this.state.chatMsg}
-          error={this.chatTooLong()}
-          disabled={this.props.isChatDisabled}
-          placeholder={
-            this.props.isChatDisabled
-              ? "The chat was disabled by the room owner."
-              : "Enter a message..."
-          }
-          rightSection={
-            <ActionIcon
-              onClick={() => {
-                // Add a delay to prevent the click from triggering onClickOutside
-                const curr = this.state.isPickerOpen;
-                setTimeout(() => this.setState({ isPickerOpen: !curr }), 100);
-              }}
-              disabled={this.props.isChatDisabled}
-            >
-              <span role="img" aria-label="Emoji">
-                😀
-              </span>
-            </ActionIcon>
-          }
+        <VoiceChat
+          ref={this.voiceChatRef}
+          socket={this.props.socket}
+          clientId={clientId}
+          onRecordingChange={this.handleVoiceRecordingChange}
+        />
+
+        {/* Input row: recording badge + text field + emoji + mic */}
+        <div
+          style={{
+            marginTop: "8px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "4px",
+          }}
         >
-          {/* <Icon onClick={this.sendChatMsg} name="send" inverted circular link /> */}
-        </TextInput>
+          {this.state.isVoiceRecording && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "3px 10px",
+                borderRadius: "20px",
+                background: "rgba(231,76,60,0.12)",
+                border: "1px solid rgba(231,76,60,0.3)",
+                width: "fit-content",
+                fontSize: "12px",
+                color: "#e74c3c",
+                fontVariantNumeric: "tabular-nums",
+              }}
+            >
+              <span
+                style={{
+                  display: "inline-block",
+                  width: "7px",
+                  height: "7px",
+                  borderRadius: "50%",
+                  background: "#e74c3c",
+                  animation: "vcPulse 1s ease-in-out infinite",
+                }}
+              />
+              {this.fmtVoiceTime(this.state.voiceSeconds)}
+            </div>
+          )}
+          <TextInput
+            onKeyDown={(e: any) => e.key === "Enter" && this.sendChatMsg()}
+            onChange={this.updateChatMsg}
+            value={this.state.chatMsg}
+            error={this.chatTooLong()}
+            disabled={this.props.isChatDisabled}
+            placeholder={
+              this.props.isChatDisabled
+                ? "The chat was disabled by the room owner."
+                : "Enter a message..."
+            }
+            rightSectionWidth={60}
+            rightSection={
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "2px",
+                  paddingRight: "2px",
+                }}
+              >
+                <ActionIcon
+                  size="sm"
+                  variant="subtle"
+                  onClick={() => {
+                    const curr = this.state.isPickerOpen;
+                    setTimeout(
+                      () => this.setState({ isPickerOpen: !curr }),
+                      100,
+                    );
+                  }}
+                  disabled={this.props.isChatDisabled}
+                >
+                  <span role="img" aria-label="Emoji" style={{ fontSize: "16px" }}>
+                    😀
+                  </span>
+                </ActionIcon>
+                <ActionIcon
+                  size="sm"
+                  variant={this.state.isVoiceRecording ? "filled" : "subtle"}
+                  color={this.state.isVoiceRecording ? "red" : undefined}
+                  onClick={() => this.voiceChatRef.current?.toggle()}
+                  title={this.state.isVoiceRecording ? "Stop recording" : "Record voice message"}
+                  style={{
+                    transition: "background 0.2s, color 0.2s",
+                  }}
+                >
+                  <span role="img" aria-label="Voice" style={{ fontSize: "15px" }}>
+                    🎤
+                  </span>
+                </ActionIcon>
+              </div>
+            }
+          />
+        </div>
+        <style>{`
+          @keyframes vcPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+          }
+        `}</style>
       </div>
     );
   }
@@ -366,6 +513,7 @@ const ChatMessage = ({
   setReactionMenu,
   handleReactionClick,
   className,
+  isMine,
 }: {
   message: ChatMessage;
   nameMap: StringDict;
@@ -383,6 +531,7 @@ const ChatMessage = ({
   ) => void;
   handleReactionClick: (value: string, id?: string, timestamp?: string) => void;
   className: string;
+  isMine?: boolean;
 }) => {
   const { user } = useContext(MetadataContext);
   const { id, timestamp, cmd, msg, system, isSub, reactions, videoTS } =
@@ -397,6 +546,7 @@ const ChatMessage = ({
         alignItems: "center",
         position: "relative",
         overflowWrap: "anywhere",
+        flexDirection: isMine ? "row-reverse" : "row",
       }}
       className={`${styles.comment} ${className}`}
     >
@@ -408,13 +558,14 @@ const ChatMessage = ({
           }
         />
       ) : null}
-      <div>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: isMine ? "flex-end" : "flex-start" }}>
         <div
           style={{
             display: "flex",
             gap: "8px",
             alignItems: "flex-end",
             fontSize: 14,
+            flexDirection: isMine ? "row-reverse" : "row",
           }}
         >
           <UserMenu
@@ -437,7 +588,10 @@ const ChatMessage = ({
           />
           <div className={styles.small + " " + styles.dark}>
             <div title={new Date(timestamp).toLocaleDateString()}>
-              {new Date(timestamp).toLocaleTimeString()}
+              {new Date(timestamp).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
               {Boolean(videoTS) && " @ "}
               {formatTimestamp(videoTS)}
             </div>
@@ -458,9 +612,8 @@ const ChatMessage = ({
           )}
         >
           <div
-            className={`${styles.light} ${
-              isEmojiString(msg) ? styles.emoji : ""
-            }`}
+            className={`${styles.light} ${isEmojiString(msg) ? styles.emoji : ""
+              }`}
           >
             {!cmd && msg}
           </div>
@@ -517,11 +670,10 @@ const ChatMessage = ({
                 <HoverCard>
                   <HoverCard.Target>
                     <div
-                      className={`${styles.reactionContainer} ${
-                        reactions[key].includes(clientId)
-                          ? styles.highlighted
-                          : ""
-                      }`}
+                      className={`${styles.reactionContainer} ${reactions[key].includes(clientId)
+                        ? styles.highlighted
+                        : ""
+                        }`}
                       onClick={() =>
                         handleReactionClick(key, message.id, message.timestamp)
                       }
@@ -642,3 +794,125 @@ export const renderImageString = (
 //   }
 // }
 // const ReactionMenu = onClickOutside(ReactionMenuInner);
+
+export function VoicePlayer({ src, isMine }: { src: string; isMine?: boolean }) {
+  const [isPlaying, setIsPlaying] = React.useState(false);
+  const [progress, setProgress] = React.useState(0);
+  const [duration, setDuration] = React.useState(0);
+  const [currentTime, setCurrentTime] = React.useState(0);
+  const [isCalculated, setIsCalculated] = React.useState(false);
+  const audioRef = React.useRef<HTMLAudioElement>(null);
+
+  const togglePlay = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      const current = audioRef.current.currentTime;
+      const dur = audioRef.current.duration;
+      setCurrentTime(current);
+      if (dur > 0) {
+        setProgress((current / dur) * 100);
+      }
+    }
+  };
+
+  const handleLoadedMetadata = (e: any) => {
+    const audio = e.currentTarget;
+    if (audio.duration === Infinity || isNaN(audio.duration) || audio.duration === 0) {
+      audio.currentTime = Number.MAX_SAFE_INTEGER;
+      audio.ontimeupdate = () => {
+        audio.ontimeupdate = null;
+        setDuration(audio.duration);
+        audio.currentTime = 0;
+        setIsCalculated(true);
+        // reattach the normal timeupdate handler
+        audio.addEventListener("timeupdate", handleTimeUpdate);
+      };
+    } else {
+      setDuration(audio.duration);
+      setIsCalculated(true);
+      audio.addEventListener("timeupdate", handleTimeUpdate);
+    }
+  };
+
+  React.useEffect(() => {
+    const audio = audioRef.current;
+    if (audio) {
+      audio.addEventListener("ended", () => {
+        setIsPlaying(false);
+        setProgress(0);
+        setCurrentTime(0);
+      });
+      return () => {
+        audio.removeEventListener("timeupdate", handleTimeUpdate);
+      };
+    }
+  }, []);
+
+  const formatTime = (time: number) => {
+    if (!time || isNaN(time)) return "0:00";
+    const mins = Math.floor(time / 60);
+    const secs = Math.floor(time % 60);
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const cColor = isMine ? "rgba(255,255,255,0.9)" : "var(--mantine-color-blue-4, #4dabf7)";
+
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: "10px", width: "100%", minWidth: "160px" }}>
+      <audio ref={audioRef} src={src} onLoadedMetadata={handleLoadedMetadata} preload="metadata" hidden />
+      
+      <div 
+        onClick={togglePlay}
+        style={{
+          width: "36px", height: "36px", borderRadius: "50%",
+          display: "flex", justifyContent: "center", alignItems: "center",
+          cursor: "pointer", flexShrink: 0,
+          background: isMine ? "rgba(255,255,255,0.2)" : "rgba(37,99,235,0.1)",
+          transition: "background 0.2s"
+        }}
+      >
+        {isPlaying ? (
+          <span style={{ fontSize: "14px", color: cColor }}>⏸️</span>
+        ) : (
+          <span style={{ fontSize: "14px", color: cColor, marginLeft: "2px" }}>▶️</span>
+        )}
+      </div>
+
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px" }}>
+        {/* Progress Bar Container */}
+        <div style={{
+           height: "4px", borderRadius: "2px", position: "relative",
+           background: isMine ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.1)",
+           cursor: "pointer", overflow: "hidden"
+        }}>
+          {/* Active Progress */}
+          <div style={{
+            position: "absolute", left: 0, top: 0, bottom: 0,
+            width: `${progress}%`,
+            background: cColor,
+            transition: isPlaying ? "width 0.1s linear" : "none"
+          }} />
+        </div>
+        
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", fontWeight: 500, fontFamily: "monospace", color: isMine ? "rgba(255,255,255,0.8)" : "var(--mantine-color-dimmed, #888)" }}>
+          <span>{formatTime(currentTime)}</span>
+          <span>{formatTime(isCalculated ? duration : 0)}</span>
+        </div>
+      </div>
+{/* 
+      <span style={{ fontSize: "15px", filter: isMine ? "drop-shadow(0 0 2px rgba(255,255,255,0.4))" : "none" }}>
+        🎤
+      </span> */}
+    </div>
+  );
+};
