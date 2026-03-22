@@ -20,6 +20,13 @@
   background: rgba(0, 0, 0, 0.1);
 }
 
+@media (max-width: 600px) {
+  .ThumbnailWrapper {
+    width: 80px;
+    height: 45px;
+  }
+}
+
 .Thumbnail {
   position: absolute;
   top: 0;

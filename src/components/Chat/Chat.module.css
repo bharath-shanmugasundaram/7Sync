@@ -5,6 +5,13 @@
 .chatContainer {
   flex-grow: 1;
   overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 600px) {
+  .chatContainer {
+    padding-bottom: 4px;
+  }
 }
 
 .hoverEffect:hover {
@@ -77,10 +84,24 @@
   box-shadow: var(--shadow-lg);
 }
 
+@media (max-width: 600px) {
+  .reactionMenuContainer {
+    font-size: 20px;
+    border-radius: 8px;
+  }
+}
+
 .reactionMenuContainer div {
   line-height: 30px;
   padding: 5px;
   transition: background-color 0.15s ease;
+}
+
+@media (max-width: 600px) {
+  .reactionMenuContainer div {
+    padding: 8px;
+    line-height: 24px;
+  }
 }
 
 .reactionMenuContainer div:hover {

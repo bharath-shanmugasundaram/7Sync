@@ -12,6 +12,13 @@
   -webkit-backdrop-filter: blur(12px);
 }
 
+@media (max-width: 600px) {
+  .topBar {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+}
+
 .logoLink {
   display: flex;
   align-items: baseline;
@@ -20,6 +27,7 @@
   font-size: 22px;
   font-weight: 700;
   letter-spacing: -0.5px;
+  flex-shrink: 0;
 }
 
 .logoAccent {
@@ -34,6 +42,13 @@
   display: flex;
   flex-direction: column;
   margin-left: 16px;
+  min-width: 0;
+}
+
+@media (max-width: 600px) {
+  .roomInfo {
+    margin-left: 8px;
+  }
 }
 
 .roomTitle {
@@ -41,11 +56,23 @@
   font-weight: 600;
   letter-spacing: 0.3px;
   text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 600px) {
+  .roomTitle {
+    font-size: 13px;
+  }
 }
 
 .roomDescription {
   font-size: 12px;
   color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .actions {
@@ -53,6 +80,23 @@
   align-items: center;
   margin-left: auto;
   gap: 6px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+  .actions {
+    gap: 4px;
+  }
+}
+
+.newRoomBtnLabel {
+  display: inline;
+}
+
+@media (max-width: 480px) {
+  .newRoomBtnLabel {
+    display: none;
+  }
 }
 
 .newRoomBtn {

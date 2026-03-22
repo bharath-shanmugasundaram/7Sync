@@ -97,3 +97,27 @@ a {
 a:hover {
   color: var(--accent-hover);
 }
+
+/* Mobile-friendly touch targets and input sizing */
+@media (max-width: 600px) {
+  /* Prevent iOS zoom on input focus (requires 16px minimum) */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+
+  /* Ensure buttons have adequate touch targets (44px minimum) */
+  button, [role="button"], .mantine-ActionIcon-root {
+    min-height: 36px;
+  }
+
+  /* Prevent horizontal overflow on mobile */
+  html, body {
+    overflow-x: hidden;
+  }
+
+  /* Improve modal sizing on mobile */
+  .mantine-Modal-content {
+    margin: 8px !important;
+    max-height: calc(100vh - 16px) !important;
+  }
+}

@@ -23,6 +23,14 @@
   opacity: 0.5;
 }
 
+@media (max-width: 600px) {
+  .ambientGlow {
+    width: 400px;
+    height: 400px;
+    top: -150px;
+  }
+}
+
 /* Hero */
 .hero {
   display: flex;
@@ -33,6 +41,12 @@
   position: relative;
   z-index: 1;
   max-width: 640px;
+}
+
+@media (max-width: 600px) {
+  .hero {
+    padding: 60px 16px 40px;
+  }
 }
 
 .heroTitle {
@@ -57,6 +71,12 @@
   line-height: 1.6;
 }
 
+@media (max-width: 600px) {
+  .heroSub {
+    margin: 12px 0 28px;
+  }
+}
+
 /* CTA Button */
 .ctaButton {
   position: relative;
@@ -73,6 +93,15 @@
   overflow: hidden;
   z-index: 1;
   letter-spacing: 0.2px;
+  width: auto;
+}
+
+@media (max-width: 600px) {
+  .ctaButton {
+    width: 100%;
+    padding: 14px 24px;
+    font-size: 16px;
+  }
 }
 
 .ctaButton:hover {
@@ -99,6 +128,13 @@
   max-width: 440px;
 }
 
+@media (max-width: 600px) {
+  .heroActions {
+    max-width: 100%;
+    gap: 12px;
+  }
+}
+
 /* Join room row */
 .joinRow {
   display: flex;
@@ -106,10 +142,16 @@
   width: 100%;
 }
 
+@media (max-width: 400px) {
+  .joinRow {
+    flex-direction: column;
+  }
+}
+
 .joinInput {
   flex: 1;
   padding: 11px 16px;
-  font-size: 14px;
+  font-size: 16px; /* 16px prevents iOS zoom on focus */
   font-family: 'Inter', sans-serif;
   border: 1px solid var(--border-card);
   border-radius: 10px;
@@ -189,6 +231,15 @@
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+@media (max-width: 600px) {
+  .featureCard {
+    padding: 18px 14px;
+  }
+  .features {
+    padding: 0 16px;
+  }
+}
+
 .featureCard:hover {
   border-color: var(--accent);
   box-shadow: 0 4px 16px var(--accent-glow);
@@ -221,6 +272,12 @@
   z-index: 1;
   width: 100%;
   max-width: 760px;
+}
+
+@media (max-width: 600px) {
+  .howItWorks {
+    padding: 40px 16px 60px;
+  }
 }
 
 .sectionTitle {
