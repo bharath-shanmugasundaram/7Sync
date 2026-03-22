@@ -1,44 +1,50 @@
 :root,
 [data-theme="light"] {
-  --bg-primary: #ffffff;
-  --bg-secondary: #f5f7fa;
+  --bg-primary: #fafbfc;
+  --bg-secondary: #f0f2f5;
   --bg-card: #ffffff;
-  --border-card: #e2e8f0;
-  --accent: #1971c2;
-  --accent-glow: rgba(25, 113, 194, 0.15);
-  --accent-hover: #1864ab;
-  --accent-light: #e7f1fb;
-  --text-primary: #1a1a2e;
-  --text-secondary: #64748b;
-  --text-muted: #94a3b8;
-  --chat-bg: #f8fafc;
-  --chat-border: #e2e8f0;
-  --chat-hover: #f8fafc;
-  --name-bg: #f1f5f9;
-  --name-text: #334155;
-  --scrollbar-track: #f5f7fa;
-  --scrollbar-thumb: #cbd5e1;
+  --border-card: #e8ecf1;
+  --accent: #2563eb;
+  --accent-glow: rgba(37, 99, 235, 0.1);
+  --accent-hover: #1d4ed8;
+  --accent-light: #eff4ff;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --chat-bg: #f9fafb;
+  --chat-border: #e8ecf1;
+  --chat-hover: #f3f4f6;
+  --name-bg: #f3f4f6;
+  --name-text: #374151;
+  --scrollbar-track: #f3f4f6;
+  --scrollbar-thumb: #d1d5db;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
 [data-theme="dark"] {
-  --bg-primary: #0f1117;
-  --bg-secondary: #1a1d27;
-  --bg-card: #1e2130;
-  --border-card: #2d3148;
-  --accent: #4dabf7;
-  --accent-glow: rgba(77, 171, 247, 0.15);
-  --accent-hover: #74c0fc;
-  --accent-light: #1a2d42;
-  --text-primary: #e2e8f0;
+  --bg-primary: #0a0b0f;
+  --bg-secondary: #12141c;
+  --bg-card: #181a24;
+  --border-card: #252836;
+  --accent: #60a5fa;
+  --accent-glow: rgba(96, 165, 250, 0.1);
+  --accent-hover: #93bbfd;
+  --accent-light: #1a2236;
+  --text-primary: #f1f5f9;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
-  --chat-bg: #1a1d27;
-  --chat-border: #2d3148;
-  --chat-hover: #232638;
-  --name-bg: #232638;
+  --chat-bg: #12141c;
+  --chat-border: #252836;
+  --chat-hover: #1e2030;
+  --name-bg: #1e2030;
   --name-text: #e2e8f0;
-  --scrollbar-track: #1a1d27;
-  --scrollbar-thumb: #3d4260;
+  --scrollbar-track: #12141c;
+  --scrollbar-thumb: #333852;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
 * {
@@ -57,16 +63,16 @@ html body {
 }
 
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--scrollbar-track);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
   background: var(--scrollbar-thumb);
-  border-radius: 3px;
+  border-radius: 8px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -75,6 +81,11 @@ html body {
 
 ::-webkit-scrollbar-corner {
   background: transparent;
+}
+
+::selection {
+  background: var(--accent);
+  color: #ffffff;
 }
 
 a {

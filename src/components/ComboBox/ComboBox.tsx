@@ -154,14 +154,14 @@ export class ComboBox extends React.Component<ComboBoxProps, ComboBoxState> {
         rightSection={
           <ActionIcon
             variant="subtle"
-            color="#1971c2"
+            color="blue"
             onClick={(e: any) => this.setMediaAndClose("")}
             title="Clear"
           >
             <IconX size={16} />
           </ActionIcon>
         }
-        leftSection={this.state.loading ? <Loader size="sm" color="#1971c2" /> : <IconLink size={18} color="#94a3b8" />}
+        leftSection={this.state.loading ? <Loader size="sm" color="blue" /> : <IconLink size={18} style={{ color: "var(--text-muted)" }} />}
         placeholder="Search YouTube or paste a video URL..."
         value={
           this.state.inputMedia !== undefined
@@ -174,12 +174,9 @@ export class ComboBox extends React.Component<ComboBoxProps, ComboBoxState> {
         styles={{
           input: {
             borderRadius: "10px",
-            border: "1px solid #e2e8f0",
-            background: "#f8fafc",
+            border: "1px solid var(--border-card)",
+            background: "var(--bg-card)",
             fontSize: "14px",
-            "&:focus": {
-              borderColor: "#1971c2",
-            },
           },
         }}
       />

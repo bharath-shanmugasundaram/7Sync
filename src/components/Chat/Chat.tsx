@@ -552,7 +552,7 @@ const ChatMessage = ({
                           <span
                             className={styles.reactionCounter}
                             style={{
-                              color: "#1971c2",
+                              color: "var(--accent)",
                               marginLeft: 3,
                             }}
                           >

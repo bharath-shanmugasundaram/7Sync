@@ -9,18 +9,18 @@
   transition: background 0.3s ease;
 }
 
-/* Ambient glow behind hero */
+/* Ambient glow behind hero — softer, more diffused */
 .ambientGlow {
   position: absolute;
-  top: -200px;
+  top: -260px;
   left: 50%;
   transform: translateX(-50%);
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, var(--accent-glow) 0%, transparent 65%);
   pointer-events: none;
   z-index: 0;
-  opacity: 0.7;
+  opacity: 0.5;
 }
 
 /* Hero */
@@ -29,15 +29,16 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 100px 24px 60px;
+  padding: 120px 24px 80px;
   position: relative;
   z-index: 1;
+  max-width: 640px;
 }
 
 .heroTitle {
-  font-size: clamp(36px, 6vw, 64px);
-  font-weight: 800;
-  line-height: 1.1;
+  font-size: clamp(34px, 5.5vw, 56px);
+  font-weight: 700;
+  line-height: 1.15;
   margin: 0;
   color: var(--text-primary);
   letter-spacing: -1.5px;
@@ -48,34 +49,36 @@
 }
 
 .heroSub {
-  font-size: clamp(16px, 2.5vw, 20px);
+  font-size: clamp(15px, 2vw, 18px);
   color: var(--text-secondary);
-  margin: 20px 0 40px;
+  margin: 16px 0 44px;
   font-weight: 400;
-  letter-spacing: 0.2px;
+  letter-spacing: 0;
+  line-height: 1.6;
 }
 
 /* CTA Button */
 .ctaButton {
   position: relative;
-  padding: 14px 40px;
-  font-size: 16px;
+  padding: 13px 36px;
+  font-size: 15px;
   font-weight: 600;
   font-family: 'Inter', sans-serif;
   color: #ffffff;
   background: var(--accent);
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   overflow: hidden;
   z-index: 1;
+  letter-spacing: 0.2px;
 }
 
 .ctaButton:hover {
   background: var(--accent-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px var(--accent-glow), 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px var(--accent-glow);
 }
 
 .ctaButton:active {
@@ -91,9 +94,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   width: 100%;
-  max-width: 480px;
+  max-width: 440px;
 }
 
 /* Join room row */
@@ -105,7 +108,7 @@
 
 .joinInput {
   flex: 1;
-  padding: 12px 16px;
+  padding: 11px 16px;
   font-size: 14px;
   font-family: 'Inter', sans-serif;
   border: 1px solid var(--border-card);
@@ -113,25 +116,26 @@
   background: var(--bg-card);
   color: var(--text-primary);
   outline: none;
-  transition: border-color 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .joinInput::placeholder {
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
 .joinInput:focus {
   border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
 .joinButton {
-  padding: 12px 20px;
+  padding: 11px 20px;
   font-size: 14px;
   font-weight: 600;
   font-family: 'Inter', sans-serif;
   color: var(--accent);
   background: transparent;
-  border: 1px solid var(--accent);
+  border: 1px solid var(--border-card);
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -139,11 +143,12 @@
 }
 
 .joinButton:hover:not(:disabled) {
+  border-color: var(--accent);
   background: var(--accent-light);
 }
 
 .joinButton:disabled {
-  opacity: 0.4;
+  opacity: 0.35;
   cursor: not-allowed;
 }
 
@@ -151,8 +156,8 @@
 .features {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  max-width: 900px;
+  gap: 12px;
+  max-width: 840px;
   width: 100%;
   padding: 0 24px;
   position: relative;
@@ -174,58 +179,56 @@
 .featureCard {
   background: var(--bg-card);
   border: 1px solid var(--border-card);
-  border-radius: 16px;
-  padding: 28px 20px;
+  border-radius: 14px;
+  padding: 24px 18px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 12px;
-  transition: all 0.3s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  gap: 10px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .featureCard:hover {
   border-color: var(--accent);
-  background: var(--accent-light);
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px var(--accent-glow);
+  box-shadow: 0 4px 16px var(--accent-glow);
 }
 
 .featureIcon {
   color: var(--accent);
+  opacity: 0.85;
 }
 
 .featureTitle {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
   text-transform: uppercase;
   color: var(--text-primary);
 }
 
 .featureText {
   font-size: 13px;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   line-height: 1.5;
 }
 
 /* How it works */
 .howItWorks {
-  padding: 80px 24px;
+  padding: 80px 24px 100px;
   text-align: center;
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 800px;
+  max-width: 760px;
 }
 
 .sectionTitle {
-  font-size: 28px;
-  font-weight: 700;
-  margin: 0 0 40px;
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0 0 44px;
   color: var(--text-primary);
-  letter-spacing: -0.5px;
+  letter-spacing: -0.3px;
 }
 
 .steps {
@@ -240,45 +243,45 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 0 20px;
+  gap: 10px;
+  padding: 0 24px;
 }
 
 .stepNumber {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
-  color: #ffffff;
-  background: var(--accent);
-  box-shadow: 0 4px 12px var(--accent-glow);
+  color: var(--accent);
+  background: var(--accent-light);
+  border: 1.5px solid var(--accent);
 }
 
 .stepText {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-secondary);
   font-weight: 500;
 }
 
 .stepDivider {
-  width: 40px;
+  width: 32px;
   height: 1px;
   background: var(--border-card);
-  margin-top: -20px;
+  margin-top: -18px;
 }
 
 @media (max-width: 600px) {
   .steps {
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
   }
   .stepDivider {
     width: 1px;
-    height: 20px;
+    height: 16px;
     margin-top: 0;
   }
 }

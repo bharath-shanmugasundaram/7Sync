@@ -18,8 +18,9 @@
   justify-content: center;
   min-height: 48vh;
   background: var(--bg-secondary);
-  border-radius: 8px;
+  border-radius: 10px;
   overflow: hidden;
+  border: 1px solid var(--border-card);
 }
 
 .flexCenter {
@@ -30,7 +31,7 @@
 
 .mobileStack {
   display: flex;
-  gap: 4px;
+  gap: 6px;
   @media only screen and (max-width: 600px) {
     flex-direction: column;
     width: calc(100% - 8px);
@@ -61,8 +62,8 @@
 }
 
 .fullHeightColumn {
-  height: calc(100vh - 60px);
-  transition: width ease-out 0.5s;
+  height: calc(100vh - 52px);
+  transition: width ease-out 0.4s;
   &.leftColumn {
     @media only screen and (max-width: 600px) {
       height: initial;
@@ -72,7 +73,7 @@
 
 .fullHeightColumnFullscreen {
   height: calc(100vh);
-  transition: width ease-out 0.5s;
+  transition: width ease-out 0.4s;
 }
 
 .shareButton {

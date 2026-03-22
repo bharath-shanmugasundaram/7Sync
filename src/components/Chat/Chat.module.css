@@ -1,5 +1,5 @@
 .subscriber {
-  color: #1971c2;
+  color: var(--accent);
 }
 
 .chatContainer {
@@ -8,12 +8,13 @@
 }
 
 .hoverEffect:hover {
-  filter: brightness(0.85);
+  filter: brightness(0.9);
 }
 
 .light {
   color: var(--text-primary);
-  font-size: 14px;
+  font-size: 13.5px;
+  line-height: 1.5;
 }
 
 .light.emoji {
@@ -32,6 +33,7 @@
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 1px;
+  color: var(--text-muted);
 }
 
 .comment .commentMenu {
@@ -44,12 +46,12 @@
   border-radius: 6px;
   cursor: pointer;
   background: var(--name-bg);
+  transition: background 0.15s ease;
 }
 
 .comment .commentMenu:hover,
 .comment.selected .commentMenu {
-  background: #1971c2;
-  transition: background 0.2s ease-in-out;
+  background: var(--accent);
 }
 
 .comment:hover,
@@ -66,23 +68,23 @@
 .reactionMenuContainer {
   display: flex;
   flex-wrap: nowrap;
-  border-radius: 8px;
+  border-radius: 10px;
   position: fixed;
   font-size: 24px;
   overflow: hidden;
   background: var(--bg-card);
   border: 1px solid var(--border-card);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-lg);
 }
 
 .reactionMenuContainer div {
   line-height: 30px;
   padding: 5px;
+  transition: background-color 0.15s ease;
 }
 
 .reactionMenuContainer div:hover {
-  background-color: #e7f1fb;
-  transition: background-color 0.2s ease-in-out;
+  background-color: var(--accent-light);
 }
 
 .reactionContainer {
@@ -96,16 +98,16 @@
   min-width: 39px;
   cursor: pointer;
   border: 1px solid transparent;
+  transition: all 0.15s ease;
 }
 
 .reactionContainer.highlighted {
-  background: #e7f1fb;
-  border-color: #1971c2;
+  background: var(--accent-light);
+  border-color: var(--accent);
 }
 
 .reactionContainer:hover {
-  background-color: #e7f1fb;
-  transition: background-color 0.2s ease-in-out;
+  background-color: var(--accent-light);
 }
 
 .reaction-enter {
@@ -125,7 +127,7 @@
 
 .reactionCounter-enter {
   transform: scale(0);
-  color: #1971c2 !important;
+  color: var(--accent) !important;
 }
 .reactionCounter-enter-active {
   transform: scale(1);
@@ -133,7 +135,7 @@
 }
 .reactionCounter-exit {
   transform: scale(1);
-  color: #1971c2 !important;
+  color: var(--accent) !important;
 }
 .reactionCounter-exit-active {
   transform: scale(0);

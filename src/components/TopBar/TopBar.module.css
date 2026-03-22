@@ -1,13 +1,15 @@
 .topBar {
   display: flex;
   align-items: center;
-  padding: 12px 24px;
+  padding: 10px 20px;
   background: var(--bg-primary);
   border-bottom: 1px solid var(--border-card);
   position: sticky;
   top: 0;
   z-index: 100;
   transition: background 0.3s ease, border-color 0.3s ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .logoLink {
@@ -15,8 +17,8 @@
   align-items: baseline;
   text-decoration: none;
   gap: 0;
-  font-size: 24px;
-  font-weight: 800;
+  font-size: 22px;
+  font-weight: 700;
   letter-spacing: -0.5px;
 }
 
@@ -35,28 +37,29 @@
 }
 
 .roomTitle {
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
   text-transform: uppercase;
 }
 
 .roomDescription {
   font-size: 12px;
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
 .actions {
   display: flex;
   align-items: center;
   margin-left: auto;
-  gap: 8px;
+  gap: 6px;
 }
 
 .newRoomBtn {
   background: var(--accent) !important;
   color: #ffffff !important;
   font-weight: 600 !important;
+  font-size: 13px !important;
   border: none !important;
   border-radius: 8px !important;
   transition: all 0.2s ease !important;
@@ -69,7 +72,7 @@
 }
 
 .themeToggle {
-  color: var(--text-secondary) !important;
+  color: var(--text-muted) !important;
   transition: color 0.2s ease;
 }
 
