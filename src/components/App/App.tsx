@@ -262,7 +262,7 @@ export class App extends React.Component<AppProps, AppState> {
   ytDebounce = true;
   localStreamToPublish?: MediaStream;
   isLocalStreamAFile = false;
-  tsIntervalId: ReturnType<typeof setInterval> | null = null;
+  tsIntervalId: number | null = null;
   publisherConns: PCDict = {};
   consumerConn?: RTCPeerConnection;
   progressUpdater?: number;
@@ -734,7 +734,7 @@ export class App extends React.Component<AppProps, AppState> {
         return;
       }
       const msg = { ...chat[msgIndex] };
-      msg.reactions = { ...msg.reactions } || {};
+      msg.reactions = { ...(msg.reactions || {}) };
       msg.reactions[data.value] = [...(msg.reactions[data.value] || []), data.user];
       chat[msgIndex] = msg;
       this.setState({ chat }, () => {
