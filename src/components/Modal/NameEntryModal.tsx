@@ -29,13 +29,13 @@ export const NameEntryModal = ({ isOpen, onSubmit }: NameEntryModalProps) => {
       title={
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <span style={{ fontWeight: 700, fontSize: 18 }}>
-            <span style={{ color: "#1971c2" }}>7</span>sync
+            <span style={{ color: "var(--accent)" }}>7</span>sync
           </span>
         </div>
       }
       styles={{
         header: {
-          borderBottom: "1px solid #e2e8f0",
+          borderBottom: "1px solid var(--border-card)",
           paddingBottom: 12,
         },
         body: {
@@ -46,8 +46,8 @@ export const NameEntryModal = ({ isOpen, onSubmit }: NameEntryModalProps) => {
       <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
         <div
           style={{
-            fontSize: 14,
-            color: "#64748b",
+            fontSize: 13,
+            color: "var(--text-secondary)",
             lineHeight: 1.6,
           }}
         >
@@ -65,20 +65,17 @@ export const NameEntryModal = ({ isOpen, onSubmit }: NameEntryModalProps) => {
           autoFocus
           styles={{
             input: {
-              borderColor: "#e2e8f0",
-              "&:focus": {
-                borderColor: "#1971c2",
-              },
+              borderColor: "var(--border-card)",
             },
           }}
         />
         <Button
           fullWidth
           size="md"
+          color="blue"
           onClick={handleSubmit}
           disabled={!name.trim()}
           style={{
-            background: name.trim() ? "#1971c2" : undefined,
             fontWeight: 600,
           }}
         >

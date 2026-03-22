@@ -2227,7 +2227,7 @@ export class App extends React.Component<AppProps, AppState> {
                           <Button
                             className={styles.shareButton}
                             variant="light"
-                            color="#1971c2"
+                            color="blue"
                             disabled={!this.haveLock()}
                             onClick={() => {
                               this.setState({
@@ -2246,7 +2246,7 @@ export class App extends React.Component<AppProps, AppState> {
                             className={styles.shareButton}
                             disabled={!this.haveLock()}
                             variant="light"
-                            color="#1971c2"
+                            color="blue"
                             onClick={() => {
                               this.setState({
                                 isVBrowserModalOpen: true,
@@ -2352,7 +2352,7 @@ export class App extends React.Component<AppProps, AppState> {
                           <Button
                             className={styles.shareButton}
                             variant="light"
-                            color="#1971c2"
+                            color="blue"
                             disabled={!this.haveLock()}
                             onClick={() => {
                               this.setState({
@@ -2399,10 +2399,10 @@ export class App extends React.Component<AppProps, AppState> {
                         <Menu.Target>
                           <Button
                             variant="light"
-                            color="#1971c2"
+                            color="blue"
                             leftSection={<IconList />}
                             rightSection={
-                              <Badge circle color="#1971c2">{playlist.length}</Badge>
+                              <Badge circle color="blue">{playlist.length}</Badge>
                             }
                             className={styles.shareButton}
                           >
@@ -2628,10 +2628,10 @@ export class App extends React.Component<AppProps, AppState> {
                 display: "flex",
                 flexDirection: "column",
                 position: "relative",
-                width: this.state.showChatColumn ? 400 : 0,
-                maxWidth: 400,
+                width: this.state.showChatColumn ? 380 : 0,
+                maxWidth: 380,
                 overflow: "hidden",
-                gap: "4px",
+                gap: "6px",
               }}
               className={`${
                 (this.state.fullScreen
@@ -2641,7 +2641,7 @@ export class App extends React.Component<AppProps, AppState> {
                 styles.rightColumn
               }`}
             >
-              <div style={{ display: "flex", width: "100%", gap: "4px" }}>
+              <div style={{ display: "flex", width: "100%", gap: "6px" }}>
                 <div
                   style={{
                     visibility: this.state.showChatColumn
@@ -2654,7 +2654,7 @@ export class App extends React.Component<AppProps, AppState> {
                     padding: "6px 12px",
                     background: "var(--name-bg)",
                     borderRadius: "8px",
-                    fontSize: "14px",
+                    fontSize: "13px",
                     color: "var(--name-text)",
                     fontWeight: 500,
                   }}
@@ -2664,32 +2664,34 @@ export class App extends React.Component<AppProps, AppState> {
                 </div>
                 <InviteButton />
               </div>
-              <div style={{ display: "flex", gap: "4px" }}>
+              <div style={{ display: "flex", gap: "6px" }}>
                 <Button
                   variant="light"
-                  color="#1971c2"
+                  color="blue"
+                  size="sm"
                   onClick={() =>
                     this.setState({
                       showPeopleColumn: !this.state.showPeopleColumn,
                     })
                   }
                   fullWidth
-                  leftSection={<IconUsersGroup />}
+                  leftSection={<IconUsersGroup size={18} />}
                   rightSection={
-                    <Badge circle color="#1971c2">{this.state.participants.length}</Badge>
+                    <Badge circle size="sm" color="blue">{this.state.participants.length}</Badge>
                   }
                 >
                   People
                 </Button>
                 <Button
                   variant="light"
-                  color="#1971c2"
+                  color="blue"
+                  size="sm"
                   title="Settings"
                   fullWidth
                   onClick={() => {
                     this.setSettingsModalOpen(true);
                   }}
-                  leftSection={<IconSettings />}
+                  leftSection={<IconSettings size={18} />}
                 >
                   Settings
                 </Button>

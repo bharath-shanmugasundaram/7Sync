@@ -121,6 +121,13 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.raw({ type: "text/plain", limit: 1000000 }));
 
+// Disable caching on API responses to prevent stale 304s
+// This sets a default that static file middleware will override with its own Cache-Control
+app.use((_req, res, next) => {
+  res.set("Cache-Control", "no-store");
+  next();
+});
+
 app.get("/ping", (_req, res) => {
   res.json("pong");
 });
@@ -635,9 +642,27 @@ app.get("/proxy/*splat", async (req, res) => {
   }
 });
 
-app.use(express.static(config.BUILD_DIRECTORY));
-// Send index.html for all other requests (SPA)
+// Hashed assets (e.g. index-B8GauvR3.js) can be cached indefinitely
+app.use(
+  "/assets",
+  express.static(path.join(config.BUILD_DIRECTORY, "assets"), {
+    maxAge: "1y",
+    immutable: true,
+  }),
+);
+// Other static files (favicon, images, etc.) — short cache with revalidation
+app.use(
+  express.static(config.BUILD_DIRECTORY, {
+    maxAge: "1h",
+    etag: true,
+    index: false, // Don't serve index.html from static middleware (we handle it below)
+  }),
+);
+// Send index.html for all other requests (SPA) — never cache to prevent stale JS references after deploy
 app.use("/*splat", (_req, res) => {
+  res.set("Cache-Control", "no-cache, no-store, must-revalidate");
+  res.set("Pragma", "no-cache");
+  res.set("Expires", "0");
   res.sendFile(
     path.resolve(
       import.meta.dirname + `/../${config.BUILD_DIRECTORY}/index.html`,

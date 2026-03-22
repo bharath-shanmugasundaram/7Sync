@@ -13,13 +13,14 @@ export const InviteButton = () => {
       )}
       <Button
         size="compact-md"
-        color="#1971c2"
+        color="blue"
         title="Invite friends"
         onClick={() => setInviteModalOpen(true)}
-        leftSection={<IconShare2 size={16} />}
+        leftSection={<IconShare2 size={14} />}
         style={{
           fontWeight: 600,
           borderRadius: 8,
+          fontSize: 13,
         }}
       >
         Invite
