@@ -1071,8 +1071,18 @@ export class Room {
           );
           assignment = data;
         }
-      } catch (e) {
+      } catch (e: any) {
         console.warn(e);
+        // If SSH key is missing or connection fundamentally fails, don't retry
+        if (e?.message?.includes('SSH key not found') || e?.errno === -2) {
+          socket.emit(
+            "errorMessage",
+            "VBrowser is not available on this server.",
+          );
+          this.vBrowserQueue = undefined;
+          this.cmdHost(null, "");
+          return;
+        }
       }
       if (assignment) {
         this.vBrowser = assignment;

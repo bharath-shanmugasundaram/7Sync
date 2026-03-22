@@ -21,13 +21,22 @@ export class Docker extends VMManager {
     if (this.ssh && this.ssh.isConnected()) {
       return this.ssh;
     }
+    let privateKey: string;
+    if (config.DOCKER_VM_HOST_SSH_KEY_BASE64) {
+      privateKey = Buffer.from(config.DOCKER_VM_HOST_SSH_KEY_BASE64, "base64").toString();
+    } else {
+      const keyPath = homedir() + "/.ssh/id_rsa";
+      if (!fs.existsSync(keyPath)) {
+        throw new Error(
+          "VBrowser SSH key not found. Set DOCKER_VM_HOST_SSH_KEY_BASE64 env var or provide ~/.ssh/id_rsa"
+        );
+      }
+      privateKey = fs.readFileSync(keyPath).toString();
+    }
     const sshConfig = {
       username: config.DOCKER_VM_HOST_SSH_USER,
       host: this.hostname,
-      // The private key the Docker host is configured to accept
-      privateKey: config.DOCKER_VM_HOST_SSH_KEY_BASE64
-        ? Buffer.from(config.DOCKER_VM_HOST_SSH_KEY_BASE64, "base64").toString()
-        : fs.readFileSync(homedir() + "/.ssh/id_rsa").toString(),
+      privateKey,
     };
     this.ssh = new NodeSSH();
     await this.ssh.connect(sshConfig);
