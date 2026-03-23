@@ -1,19 +1,43 @@
-import React, { useState } from "react";
-import { Modal, TextInput, Button } from "@mantine/core";
+import React, { useState, useEffect } from "react";
+import { Modal, TextInput, Button, ActionIcon } from "@mantine/core";
 import { IconUser } from "@tabler/icons-react";
 
 interface NameEntryModalProps {
   isOpen: boolean;
-  onSubmit: (name: string) => void;
+  onSubmit: (name: string, avatarUrl: string) => void;
 }
+
+const PRESET_AVATARS = [
+  "https://api.dicebear.com/7.x/bottts/svg?seed=Felix",
+  "https://api.dicebear.com/7.x/bottts/svg?seed=Bear",
+  "https://api.dicebear.com/7.x/bottts/svg?seed=Rocky",
+  "https://api.dicebear.com/7.x/bottts/svg?seed=Oliver",
+  "https://api.dicebear.com/7.x/bottts/svg?seed=Max",
+  "https://api.dicebear.com/7.x/bottts/svg?seed=Leo",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Mia",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Luna",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Coco",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Lucy",
+];
 
 export const NameEntryModal = ({ isOpen, onSubmit }: NameEntryModalProps) => {
   const [name, setName] = useState("");
+  const [avatar, setAvatar] = useState("");
+
+  useEffect(() => {
+    if (isOpen) {
+      const savedName = window.localStorage.getItem("watchparty-username");
+      const savedAvatar = window.localStorage.getItem("watchparty-avatar");
+      if (savedName) setName(savedName);
+      if (savedAvatar) setAvatar(savedAvatar);
+      else setAvatar(PRESET_AVATARS[0]);
+    }
+  }, [isOpen]);
 
   const handleSubmit = () => {
     const trimmed = name.trim();
     if (trimmed) {
-      onSubmit(trimmed);
+      onSubmit(trimmed, avatar);
     }
   };
 
@@ -51,10 +75,32 @@ export const NameEntryModal = ({ isOpen, onSubmit }: NameEntryModalProps) => {
             lineHeight: 1.6,
           }}
         >
-          Enter your display name to join this room.
-          <br />
-          This name will be visible to other participants.
+          Choose your avatar and enter your display name to join this room.
         </div>
+
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: "#475569", marginBottom: "8px" }}>Select Avatar</div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", justifyContent: "center" }}>
+            {PRESET_AVATARS.map((url) => (
+              <ActionIcon
+                key={url}
+                size={48}
+                radius="xl"
+                variant={avatar === url ? "filled" : "light"}
+                color={avatar === url ? "blue" : "gray"}
+                onClick={() => setAvatar(url)}
+                style={{
+                  border: avatar === url ? "2px solid #1971c2" : "2px solid transparent",
+                  transition: "all 0.2s ease",
+                  backgroundColor: avatar === url ? "#e7f5ff" : "#f8fafc",
+                }}
+              >
+                <img src={url} alt="avatar" style={{ width: "36px", height: "36px", borderRadius: "50%" }} />
+              </ActionIcon>
+            ))}
+          </div>
+        </div>
+
         <TextInput
           placeholder="Your display name"
           value={name}
@@ -62,7 +108,6 @@ export const NameEntryModal = ({ isOpen, onSubmit }: NameEntryModalProps) => {
           onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
           leftSection={<IconUser size={16} />}
           size="md"
-          autoFocus
           styles={{
             input: {
               borderColor: "var(--border-card)",
@@ -77,6 +122,7 @@ export const NameEntryModal = ({ isOpen, onSubmit }: NameEntryModalProps) => {
           disabled={!name.trim()}
           style={{
             fontWeight: 600,
+            marginTop: "8px",
           }}
         >
           Join Room
